@@ -14,7 +14,8 @@ Navegador -> VPS:5005 -> app.py (Python) -> index.html
 | `/`, `/login`, qualquer caminho | `index.html` com `200` (nunca 404) |
 | `/healthz` | `200 ok` — usado pelo healthcheck do Docker |
 
-> A música de fundo foi **retirada** da página (sem player, sem `audio.mp3`).
+> A música de fundo foi **retirada** da página (sem player, sem `audio.mp3`) e a
+> contagem de 10 s também: quem leva ao novo site é o **botão play** (`Acessar o novo site`).
 
 ---
 

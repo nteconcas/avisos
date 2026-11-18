@@ -144,9 +144,9 @@ curl -s http://10.105.35.172:5005/login | grep -o "<title>.*</title>"
 # Esperado: <title>Aviso — Sistema de Ponto migrado | Praticus</title>
 ```
 
-3. Abra no navegador: `http://10.105.35.172:5005/login` → deve aparecer o aviso,
-   com redirecionamento automático para `https://ponto.praticus.com.br/login` após 10 s.
-   A página **não toca música** (recurso retirado).
+3. Abra no navegador: `http://10.105.35.172:5005/login` → deve aparecer o aviso, com o
+   **botão play** que abre `https://ponto.praticus.com.br/login` (não há mais contagem
+   nem redirecionamento automático). A página **não toca música** (recurso retirado).
 
 > Se quiser confirmar o que está no ar sem abrir o navegador:
 > `curl -s -o /dev/null -w '%{http_code} %{content_type}\n' http://IP:5005/`
