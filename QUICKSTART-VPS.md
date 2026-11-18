@@ -28,33 +28,21 @@ python3 app.py        # sobe em 0.0.0.0:5005
 
 Em outro terminal, confirme: `curl -I http://127.0.0.1:5005/login` → `HTTP/1.1 200 OK`.
 
-Para ficar rodando sempre (e voltar após reboot), use **systemd**.
-Crie `/etc/systemd/system/aviso-ponto.service`:
-
-```ini
-[Unit]
-Description=Aviso de migracao do sistema de ponto
-After=network.target
-
-[Service]
-WorkingDirectory=/root/avisos
-ExecStart=/usr/bin/python3 app.py
-Environment=PORT=5005
-Restart=always
-RestartSec=3
-
-[Install]
-WantedBy=multi-user.target
-```
+Para ficar rodando sempre (e voltar após reboot), use o `aviso-ponto.service`
+que está neste repositório:
 
 ```bash
+cd ~/avisos
+sudo cp aviso-ponto.service /etc/systemd/system/
+sudo sed -i "s#/root/avisos#$(pwd)#" /etc/systemd/system/aviso-ponto.service
 sudo systemctl daemon-reload
 sudo systemctl enable --now aviso-ponto
 systemctl status aviso-ponto --no-pager
 sudo journalctl -u aviso-ponto -f     # logs (Ctrl+C para sair)
 ```
 
-> Ajuste `WorkingDirectory` para a pasta real do projeto (onde está `app.py`).
+> Confira se o `ExecStart` aponta para o python certo (`which python3`).
+> Se o projeto estiver em outra pasta, ajuste o `WorkingDirectory` no arquivo.
 
 ## 1. Com Docker — script pronto
 

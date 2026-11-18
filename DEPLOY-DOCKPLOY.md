@@ -32,6 +32,7 @@ avisos/
 ├── docker-compose.yml  ← alternativa (Compose / docker direto), publica 5005:5005
 ├── deploy-vps.sh       ← sobe/valida na 5005 com um comando
 ├── diagnostico.sh      ← coleta o estado quando algo não abre
+├── aviso-ponto.service ← unit do systemd (rodar sem Docker)
 ├── QUICKSTART-VPS.md   ← passo a passo resumido
 └── DEPLOY-DOCKPLOY.md  ← este guia
 ```
