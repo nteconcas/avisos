@@ -147,6 +147,9 @@ curl -s http://10.105.35.172:5005/login | grep -o "<title>.*</title>"
 
 3. Abra no navegador: `http://10.105.35.172:5005/login` → deve aparecer o aviso,
    com redirecionamento automático para `https://ponto.praticus.com.br/login` após 10 s.
+   A música de fundo toca em loop (o som é liberado no primeiro toque/clique, conforme a
+   política de autoplay dos navegadores) e, enquanto ela está tocando, a contagem
+   regressiva fica **pausada** — ao pausar a música, a contagem volta a correr.
 
 > Se quiser confirmar o que está no ar sem abrir o navegador:
 > `curl -s -o /dev/null -w '%{http_code} %{content_type}\n' http://IP:5005/`

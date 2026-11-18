@@ -2,318 +2,1045 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Aviso — Sistema de Ponto migrado | Praticus</title>
   <meta name="description" content="O endereço http://10.105.35.172:5005/login foi desativado. Acesse o sistema de ponto pelo novo endereço: https://ponto.praticus.com.br/login" />
   <meta name="robots" content="noindex, nofollow" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f766e'/%3E%3Ccircle cx='32' cy='34' r='16' fill='none' stroke='white' stroke-width='4'/%3E%3Cpath d='M32 26v8l6 4' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <meta name="theme-color" content="#062e2b" />
+  <meta name="color-scheme" content="dark" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232dd4bf'/%3E%3Cstop offset='1' stop-color='%23047857'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Ccircle cx='32' cy='34' r='15' fill='none' stroke='white' stroke-width='4'/%3E%3Cpath d='M32 27v8l6 3.5' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E" />
   <style>
+    /* ============================================================
+       Aviso de migração — página única, sem dependências externas
+       Temas: fundo "aurora", cartão glass, anel de contagem regressiva
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --brand: #0f766e;
-      --brand-dark: #115e59;
-      --bg: #f1f5f9;
-      --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-      --warning-bg: #fef3c7;
-      --warning-border: #f59e0b;
-      --warning-text: #92400e;
-      --old: #dc2626;
-      --new: #059669;
+      --brand: #2dd4bf;
+      --brand-deep: #0d9488;
+      --ink: #e8f4f2;
+      --muted: #9fb3b8;
+      --old: #fb7185;
+      --new: #34d399;
+      --card: rgba(9, 24, 30, 0.82);
+      --line: rgba(255, 255, 255, 0.10);
+      --shadow: 0 40px 90px -28px rgba(0, 0, 0, 0.85);
+      --radius: 28px;
+      --pad: clamp(18px, 3.4vw, 40px);
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { -webkit-text-size-adjust: 100%; }
+
     body {
-      font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: linear-gradient(160deg, #0f766e 0%, #134e4a 45%, #0f172a 100%);
+      font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
+      color: var(--ink);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      color: var(--text);
-    }
-    .card {
-      background: var(--card);
-      width: 100%;
-      max-width: 680px;
-      border-radius: 20px;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
-      overflow: hidden;
-    }
-    .card-header {
-      background: var(--brand);
-      color: #fff;
-      padding: 22px 32px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .logo {
-      width: 44px;
-      height: 44px;
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .card-header h1 { font-size: 1.25rem; font-weight: 600; letter-spacing: 0.3px; }
-    .card-header p { font-size: 0.85rem; opacity: 0.85; margin-top: 2px; }
-    .card-body { padding: 32px; }
-    .badge-cloud {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #ecfdf5;
-      color: #047857;
-      border: 1px solid #a7f3d0;
-      font-size: 0.78rem;
-      font-weight: 600;
-      padding: 5px 12px;
-      border-radius: 999px;
-      margin-bottom: 18px;
-    }
-    h2 { font-size: 1.5rem; margin-bottom: 14px; line-height: 1.3; }
-    .aviso {
-      background: var(--warning-bg);
-      border-left: 5px solid var(--warning-border);
-      color: var(--warning-text);
-      padding: 14px 18px;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      margin-bottom: 22px;
-      line-height: 1.55;
-    }
-    .aviso strong { color: #78350f; }
-    .enderecos {
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      margin-bottom: 26px;
+      align-items: center;
+      padding: clamp(10px, 2.6vw, 36px);
+      padding-bottom: max(clamp(10px, 2.6vw, 36px), env(safe-area-inset-bottom));
+      overflow-x: hidden;
+      background:
+        radial-gradient(1100px 640px at 8% -12%, #0f766e 0%, rgba(15, 118, 110, 0) 62%),
+        radial-gradient(900px 620px at 102% -4%, #1e3a8a 0%, rgba(30, 58, 138, 0) 58%),
+        radial-gradient(800px 520px at 50% 112%, #0369a1 0%, rgba(3, 105, 161, 0) 60%),
+        linear-gradient(165deg, #051a19 0%, #062a27 42%, #071426 100%);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
+
+    /* ---------- fundo decorativo ---------- */
+    .aurora { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+    .aurora span {
+      position: absolute;
+      display: block;
+      width: 46vmax;
+      height: 46vmax;
+      border-radius: 50%;
+      filter: blur(70px);
+      opacity: 0.42;
+      animation: flutuar 22s var(--ease) infinite alternate;
+    }
+    .aurora span:nth-child(1) { top: -18vmax; left: -12vmax; background: #14b8a6; }
+    .aurora span:nth-child(2) { top: 30vmax; right: -16vmax; background: #2563eb; animation-duration: 28s; animation-delay: -6s; }
+    .aurora span:nth-child(3) { bottom: -22vmax; left: 24vmax; background: #0891b2; animation-duration: 32s; animation-delay: -12s; opacity: 0.3; }
+    @keyframes flutuar {
+      from { transform: translate3d(0, 0, 0) scale(1); }
+      to   { transform: translate3d(3vmax, -4vmax, 0) scale(1.16); }
+    }
+    .grao {
+      position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ---------- cartão ---------- */
+    .cartao {
+      position: relative;
+      z-index: 2;
+      width: min(1120px, 100%);
+      min-width: 0;
+      margin-block: auto;
+      background: linear-gradient(180deg, rgba(13, 34, 41, 0.90) 0%, rgba(7, 20, 27, 0.95) 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(20px) saturate(120%);
+      -webkit-backdrop-filter: blur(20px) saturate(120%);
+      overflow: hidden;
+      animation: entrar 0.7s var(--ease) both;
+    }
+    .cartao::after {
+      content: "";
+      position: absolute; inset: 0; pointer-events: none;
+      border-radius: inherit;
+      background: linear-gradient(120deg, rgba(45, 212, 191, 0.16), transparent 34%, transparent 66%, rgba(37, 99, 235, 0.16));
+      mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+      -webkit-mask: linear-gradient(#000, #000) content-box, linear-gradient(#000, #000);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      padding: 1px;
+    }
+    @keyframes entrar {
+      from { opacity: 0; transform: translateY(18px) scale(0.985); }
+      to   { opacity: 1; transform: none; }
+    }
+    /* ---------- topo ---------- */
+    .topo {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px 18px;
+      padding: var(--pad);
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(45, 212, 191, 0.07), transparent);
+    }
+    .marca { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .logo {
+      flex-shrink: 0;
+      width: clamp(42px, 8vw, 54px);
+      height: clamp(42px, 8vw, 54px);
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(150deg, #2dd4bf, #0f766e 68%);
+      box-shadow: 0 12px 26px -12px rgba(45, 212, 191, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+    .logo svg { width: 58%; height: 58%; }
+    .logo .ponteiro { animation: girar 14s linear infinite; transform-origin: 32px 34px; }
+    @keyframes girar { to { transform: rotate(360deg); } }
+    .marca h1 {
+      font-size: clamp(1rem, 0.9rem + 0.5vw, 1.2rem);
+      font-weight: 650;
+      letter-spacing: 0.2px;
+      line-height: 1.25;
+    }
+    .marca p { font-size: clamp(0.74rem, 0.7rem + 0.2vw, 0.85rem); color: var(--muted); margin-top: 3px; }
+    .selo-nuvem {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.76rem;
+      font-weight: 650;
+      letter-spacing: 0.3px;
+      color: #a7f3d0;
+      background: rgba(16, 185, 129, 0.13);
+      border: 1px solid rgba(52, 211, 153, 0.38);
+      padding: 7px 13px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    /* ---------- corpo ---------- */
+    .corpo {
+      display: grid;
+      grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.82fr);
+      gap: clamp(20px, 3vw, 38px);
+      padding: var(--pad);
+      align-items: start;
+    }
+    .principal { min-width: 0; display: grid; gap: clamp(16px, 2vw, 22px); }
+    .lateral {
+      min-width: 0;
+      display: grid;
+      gap: clamp(14px, 1.8vw, 18px);
+      align-content: start;
+      position: sticky;
+      top: clamp(8px, 2vw, 24px);
+    }
+
+    .olho {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--brand);
+    }
+    .olho::before {
+      content: "";
+      width: 22px; height: 2px; border-radius: 2px;
+      background: linear-gradient(90deg, transparent, var(--brand));
+    }
+    h2 {
+      font-size: clamp(1.65rem, 1.1rem + 2.6vw, 2.7rem);
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+      font-weight: 750;
+    }
+    h2 .riscado {
+      color: #fda4af;
+      text-decoration: line-through;
+      text-decoration-thickness: 3px;
+      text-decoration-color: rgba(251, 113, 133, 0.75);
+    }
+    .lead {
+      font-size: clamp(0.92rem, 0.88rem + 0.25vw, 1.02rem);
+      color: #c7d8da;
+      line-height: 1.6;
+      max-width: 62ch;
+    }
+
+    /* ---------- caixa de atenção ---------- */
+    .aviso {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      padding: clamp(13px, 1.8vw, 18px) clamp(14px, 2vw, 20px);
+      border-radius: 16px;
+      background: linear-gradient(120deg, rgba(245, 158, 11, 0.16), rgba(245, 158, 11, 0.07));
+      border: 1px solid rgba(245, 158, 11, 0.34);
+      border-left: 4px solid #f59e0b;
+      font-size: clamp(0.86rem, 0.84rem + 0.2vw, 0.95rem);
+      line-height: 1.62;
+      color: #ffe8bd;
+    }
+    .aviso strong { color: #ffd28a; font-weight: 700; }
+    .aviso .icone {
+      flex-shrink: 0;
+      width: 26px; height: 26px;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      background: rgba(245, 158, 11, 0.22);
+      color: #fbbf24;
+    }
+    .aviso code {
+      font-family: "Cascadia Code", Consolas, Menlo, monospace;
+      font-size: 0.94em;
+      background: rgba(0, 0, 0, 0.28);
+      padding: 1px 6px;
+      border-radius: 6px;
+      word-break: break-all;
+    }
+
+    /* ---------- endereços ---------- */
+    .enderecos { display: grid; gap: 12px; }
     .endereco {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: clamp(12px, 1.6vw, 16px);
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.035);
+      transition: transform 0.25s var(--ease), border-color 0.25s var(--ease), background 0.25s var(--ease);
+    }
+    .endereco .rotulo {
+      display: grid;
+      gap: 1px;
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      line-height: 1.25;
+      padding: 6px 10px;
+      border-radius: 10px;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .endereco code {
+      font-family: "Cascadia Code", Consolas, Menlo, monospace;
+      font-size: clamp(0.78rem, 0.74rem + 0.35vw, 0.94rem);
+      line-height: 1.35;
+      word-break: break-all;
+      min-width: 0;
+    }
+    .endereco .nota { font-size: 0.7rem; color: var(--muted); display: block; margin-top: 2px; }
+
+    .antigo { border-color: rgba(251, 113, 133, 0.28); background: rgba(251, 113, 133, 0.07); }
+    .antigo .rotulo { background: rgba(251, 113, 133, 0.18); color: #fecdd3; }
+    .antigo code { color: #fda4af; text-decoration: line-through; text-decoration-color: rgba(251, 113, 133, 0.6); opacity: 0.85; }
+
+    .novo {
+      position: relative;
+      border-color: rgba(52, 211, 153, 0.45);
+      background: linear-gradient(120deg, rgba(16, 185, 129, 0.16), rgba(16, 185, 129, 0.05));
+      box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.08), 0 18px 40px -30px rgba(16, 185, 129, 0.9);
+    }
+    .novo .rotulo { background: rgba(52, 211, 153, 0.2); color: #bbf7d0; }
+    .novo code { color: #d1fae5; font-weight: 600; }
+    /* ---------- ações ---------- */
+    .acoes { display: grid; gap: 10px; }
+    .btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      text-align: center;
+      text-decoration: none;
+      font: inherit;
+      font-size: clamp(0.95rem, 0.9rem + 0.3vw, 1.06rem);
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      color: #04201d;
+      padding: clamp(14px, 1.8vw, 18px) clamp(16px, 2vw, 24px);
+      border: 0;
+      border-radius: 14px;
+      cursor: pointer;
+      background: linear-gradient(120deg, #5eead4, #2dd4bf 45%, #14b8a6);
+      box-shadow: 0 18px 38px -18px rgba(45, 212, 191, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease), filter 0.2s var(--ease);
+    }
+    .btn .seta { transition: transform 0.25s var(--ease); }
+    .btn:focus-visible { outline: 3px solid #99f6e4; outline-offset: 3px; }
+    .btn-secundario {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      font: inherit;
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: #cbe6e4;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px 16px;
+      cursor: pointer;
+      transition: background 0.2s var(--ease), border-color 0.2s var(--ease);
+    }
+    .btn-secundario svg { opacity: 0.8; }
+    .btn-secundario:focus-visible { outline: 3px solid #5eead4; outline-offset: 2px; }
+
+    /* ---------- lista "o que saber" ---------- */
+    .detalhes {
+      display: grid;
+      gap: 4px;
+      padding-top: clamp(14px, 2vw, 20px);
+      border-top: 1px solid var(--line);
+    }
+    .detalhes h3 {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 1.1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .detalhes ul { list-style: none; display: grid; gap: 11px; }
+    .detalhes li {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 10px;
+      font-size: clamp(0.82rem, 0.79rem + 0.2vw, 0.9rem);
+      line-height: 1.6;
+      color: #bfd3d6;
+    }
+    .detalhes li strong { color: #eafffb; font-weight: 650; }
+    .detalhes .check {
+      flex-shrink: 0;
+      width: 19px; height: 19px;
+      margin-top: 2px;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      background: rgba(52, 211, 153, 0.15);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      color: #6ee7b7;
+    }
+
+    /* ---------- painéis laterais ---------- */
+    .painel {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02));
+      padding: clamp(14px, 2vw, 20px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    .painel-titulo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 1.1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* anel de contagem */
+    .contagem { display: grid; justify-items: center; gap: 12px; }
+    .anel { position: relative; width: clamp(132px, 26vw, 158px); aspect-ratio: 1; }
+    .anel svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .anel-trilha { fill: none; stroke: rgba(255, 255, 255, 0.09); stroke-width: 7; }
+    .anel-progresso {
+      fill: none;
+      stroke: url(#gradAnel);
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-dasharray: 326.73;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.9s linear;
+    }
+    .anel-num {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-content: center;
+      justify-items: center;
+      gap: 1px;
+    }
+    .anel-num strong {
+      font-size: clamp(1.9rem, 1.4rem + 2vw, 2.5rem);
+      font-weight: 780;
+      line-height: 1;
+      letter-spacing: -1px;
+      font-variant-numeric: tabular-nums;
+    }
+    .anel-num small { font-size: 0.64rem; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
+    .contagem-txt {
+      font-size: clamp(0.78rem, 0.76rem + 0.2vw, 0.87rem);
+      line-height: 1.55;
+      color: #c3d6d8;
+      text-align: center;
+    }
+    .contagem-txt a { color: var(--brand); font-weight: 700; text-decoration: none; border-bottom: 1px solid rgba(45, 212, 191, 0.4); }
+    .contagem-txt a:hover { border-bottom-color: var(--brand); }
+    .contagem.pausada .anel-progresso { stroke: rgba(148, 163, 184, 0.75); }
+    /* ---------- música ---------- */
+    .musica-painel { display: grid; gap: 11px; }
+    .botao-musica {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 14px 16px;
-      border-radius: 12px;
-      font-size: 0.92rem;
-    }
-    .endereco .rotulo {
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      flex-shrink: 0;
-      width: 86px;
-    }
-    .endereco code {
-      font-family: "Consolas", "Menlo", monospace;
-      font-size: 0.92rem;
-      word-break: break-all;
-    }
-    .antigo {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #7f1d1d;
-    }
-    .antigo .rotulo { color: var(--old); }
-    .antigo code { text-decoration: line-through; opacity: 0.75; }
-    .novo {
-      background: #ecfdf5;
-      border: 1px solid #a7f3d0;
-      color: #064e3b;
-    }
-    .novo .rotulo { color: var(--new); }
-    .btn {
-      display: block;
       width: 100%;
-      text-align: center;
-      background: var(--brand);
-      color: #fff;
-      text-decoration: none;
-      font-size: 1.05rem;
-      font-weight: 600;
-      padding: 16px 24px;
-      border-radius: 12px;
-      transition: background 0.2s ease, transform 0.15s ease;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      padding: 11px 13px;
+      border-radius: 14px;
+      color: #e8fffb;
+      background: rgba(45, 212, 191, 0.10);
+      border: 1px solid rgba(45, 212, 191, 0.35);
+      transition: background 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.2s var(--ease);
     }
-    .btn:hover { background: var(--brand-dark); transform: translateY(-1px); }
-    .btn .seta { margin-left: 8px; }
-    .detalhes {
-      margin-top: 26px;
-      padding-top: 22px;
-      border-top: 1px solid #e2e8f0;
-    }
-    .detalhes h3 {
-      font-size: 0.95rem;
-      margin-bottom: 12px;
-      color: var(--text);
-    }
-    .detalhes ul { list-style: none; }
-    .detalhes li {
-      display: flex;
-      gap: 10px;
-      font-size: 0.9rem;
-      color: var(--muted);
-      line-height: 1.55;
-      margin-bottom: 10px;
-    }
-    .detalhes li .check {
-      color: var(--new);
-      font-weight: 700;
+    .botao-musica:focus-visible { outline: 3px solid #5eead4; outline-offset: 2px; }
+    .botao-musica .texto { display: grid; gap: 2px; min-width: 0; }
+    .botao-musica .texto b { font-size: 0.88rem; font-weight: 680; }
+    .botao-musica .texto span { font-size: 0.7rem; color: var(--muted); }
+    .botao-musica .disco {
       flex-shrink: 0;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      background: linear-gradient(150deg, #2dd4bf, #0f766e);
+      color: #04201d;
+      box-shadow: 0 10px 20px -12px rgba(45, 212, 191, 0.95);
     }
-    .contador {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 0.85rem;
+    .igualador { display: inline-flex; align-items: flex-end; gap: 2px; height: 15px; }
+    .igualador i {
+      display: block;
+      width: 3px;
+      height: 5px;
+      border-radius: 2px;
+      background: currentColor;
+      opacity: 0.45;
+      transition: opacity 0.2s linear;
+    }
+    .tocando .igualador i { opacity: 1; animation: pulsar-barra 0.9s ease-in-out infinite; }
+    .tocando .igualador i:nth-child(2) { animation-delay: 0.15s; }
+    .tocando .igualador i:nth-child(3) { animation-delay: 0.3s; }
+    .tocando .igualador i:nth-child(4) { animation-delay: 0.45s; }
+    @keyframes pulsar-barra {
+      0%, 100% { height: 4px; }
+      50% { height: 15px; }
+    }
+    .dica-musica {
+      font-size: 0.72rem;
+      line-height: 1.5;
+      color: #ffd28a;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px dashed rgba(245, 158, 11, 0.4);
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+    .dica-musica[hidden] { display: none; }
+
+    /* ---------- rodapé ---------- */
+    .rodape {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px 16px;
+      padding: clamp(13px, 1.8vw, 18px) var(--pad);
+      border-top: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.22);
+      font-size: clamp(0.72rem, 0.7rem + 0.15vw, 0.82rem);
       color: var(--muted);
+      line-height: 1.5;
     }
-    .contador a { color: var(--brand); font-weight: 600; text-decoration: none; }
-    .card-footer {
-      background: #f8fafc;
-      border-top: 1px solid #e2e8f0;
-      padding: 16px 32px;
+    .rodape strong { color: #d7e9e8; font-weight: 650; }
+
+    /* ---------- toast "copiado" ---------- */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: max(74px, calc(env(safe-area-inset-bottom) + 64px));
+      transform: translate(-50%, 160%);
+      z-index: 20;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 650;
+      color: #04201d;
+      background: linear-gradient(120deg, #5eead4, #2dd4bf);
+      padding: 10px 16px;
+      border-radius: 999px;
+      box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.8);
+      opacity: 0;
+      transition: transform 0.35s var(--ease), opacity 0.35s var(--ease);
+    }
+    .toast.visivel { transform: translate(-50%, 0); opacity: 1; }
+
+    /* ---------- detalhes finos ---------- */
+    .contagem-nota {
+      margin-top: 10px;
+      font-size: 0.72rem;
+      line-height: 1.45;
+      color: #a5f3fc;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 10px;
+      padding: 7px 10px;
       text-align: center;
+    }
+    .contagem-nota[hidden] { display: none; }
+    .endereco .btn-secundario { width: auto; white-space: nowrap; padding: 9px 13px; }
+
+    /* ---------- botão flutuante da música ---------- */
+    .flutuante-musica {
+      position: fixed;
+      right: max(14px, env(safe-area-inset-right));
+      bottom: max(14px, env(safe-area-inset-bottom));
+      z-index: 18;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font: inherit;
       font-size: 0.8rem;
-      color: var(--muted);
+      font-weight: 750;
+      color: #04201d;
+      background: linear-gradient(120deg, #5eead4, #2dd4bf);
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 16px;
+      cursor: pointer;
+      box-shadow: 0 18px 36px -14px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      animation: chamar 2.6s ease-in-out infinite;
     }
-    @media (max-width: 480px) {
-      .card-body { padding: 24px 20px; }
-      .card-header { padding: 18px 20px; }
-      h2 { font-size: 1.25rem; }
-      .endereco { flex-direction: column; align-items: flex-start; gap: 4px; }
-      .endereco .rotulo { width: auto; }
+    .flutuante-musica[hidden] { display: none; }
+    .flutuante-musica .nota { font-size: 1.05rem; line-height: 1; }
+    .flutuante-musica:focus-visible { outline: 3px solid #99f6e4; outline-offset: 3px; }
+    @keyframes chamar {
+      0%, 100% { transform: translateY(0); box-shadow: 0 18px 36px -14px rgba(0, 0, 0, 0.9); }
+      50% { transform: translateY(-4px); box-shadow: 0 22px 42px -14px rgba(45, 212, 191, 0.75); }
+    }
+
+    /* ---------- responsivo ---------- */
+    @media (hover: hover) and (pointer: fine) {
+      .btn:hover { transform: translateY(-2px); filter: brightness(1.04); }
+      .btn:hover .seta { transform: translateX(4px); }
+      .botao-musica:hover { background: rgba(45, 212, 191, 0.18); border-color: rgba(45, 212, 191, 0.6); }
+      .btn-secundario:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.24); }
+      .novo:hover { transform: translateY(-1px); }
+    }
+
+    @media (max-width: 940px) {
+      .corpo { grid-template-columns: minmax(0, 1fr); }
+      .lateral { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 640px) {
+      .topo { justify-content: flex-start; }
+      .lateral { grid-template-columns: minmax(0, 1fr); }
+      .endereco { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+      .endereco .rotulo { justify-self: start; text-align: left; }
+      .endereco .btn-secundario { width: 100%; }
+      .contagem { grid-template-columns: auto minmax(0, 1fr); justify-items: start; align-items: center; }
+      .contagem-txt { text-align: left; }
+    }
+
+    @media (max-width: 400px) {
+      .aurora span { filter: blur(52px); opacity: 0.32; }
+      .rodape { flex-direction: column; align-items: flex-start; }
+      .anel-num strong { font-size: 1.7rem; }
+    }
+
+    @media (max-height: 700px) and (min-width: 941px) {
+      .anel { width: 118px; }
+      .corpo { padding-top: clamp(16px, 2vw, 24px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+      .aurora span { animation: none; }
+    }
+
+    @media print {
+      body { background: #fff; color: #111; display: block; }
+      .aurora, .grao, .toast, .painel-musica, .acoes, .flutuante-musica { display: none !important; }
+      .cartao { box-shadow: none; border: 1px solid #ccc; background: #fff; }
+      .aviso, .endereco, .painel { background: #f7f7f7; color: #111; }
+      .aviso strong, .endereco code, .lead { color: #111; }
+      .olho, .rodape, .detalhes h3 { color: #444; }
     }
   </style>
 </head>
 <body>
-  <main class="card">
-    <header class="card-header">
-      <div class="logo" aria-hidden="true">
-        <svg width="26" height="26" viewBox="0 0 64 64" fill="none">
-          <circle cx="32" cy="34" r="16" stroke="white" stroke-width="4"/>
-          <path d="M32 26v8l6 4" stroke="white" stroke-width="4" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div>
-        <h1>Praticus — Sistema de Ponto</h1>
-        <p>Comunicado importante aos usuários</p>
-      </div>
-    </header>
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+  <div class="grao" aria-hidden="true"></div>
 
-    <div class="card-body">
-      <span class="badge-cloud">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+  <main class="cartao">
+    <header class="topo">
+      <div class="marca">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="34" r="16" stroke="white" stroke-width="4" />
+            <g class="ponteiro">
+              <path d="M32 34V25" stroke="white" stroke-width="4" stroke-linecap="round" />
+              <path d="M32 34l6.5 4" stroke="white" stroke-width="4" stroke-linecap="round" />
+            </g>
+          </svg>
+        </div>
+        <div class="marca-txt">
+          <h1>Praticus — Sistema de Ponto</h1>
+          <p>Comunicado importante aos usuários</p>
+        </div>
+      </div>
+      <span class="selo-nuvem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" />
         </svg>
         Agora em nuvem (cloud)
       </span>
+    </header>
 
-      <h2>Este endereço foi desativado</h2>
-
-      <div class="aviso">
-        <strong>Atenção:</strong> o acesso ao sistema pelo endereço antigo
-        <strong>http://10.105.35.172:5005/login</strong> foi
-        <strong>desativado permanentemente</strong>. O sistema de ponto foi migrado
-        para a nuvem e agora deve ser acessado exclusivamente pelo novo endereço abaixo.
-      </div>
-
-      <div class="enderecos">
-        <div class="endereco antigo">
-          <span class="rotulo">Antigo<br />(inativo)</span>
-          <code>http://10.105.35.172:5005/login</code>
+    <div class="corpo">
+      <section class="principal">
+        <div>
+          <p class="olho">Aviso de migração</p>
+          <h2>Este endereço foi <span class="riscado">desativado</span></h2>
         </div>
-        <div class="endereco novo">
-          <span class="rotulo">Novo<br />(oficial)</span>
-          <code>https://ponto.praticus.com.br/login</code>
+
+        <p class="lead">
+          O sistema continua funcionando <strong>com as mesmas regras</strong> — apenas o
+          endereço de acesso mudou.
+        </p>
+
+        <div class="aviso">
+          <span class="icone" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2 1 21h22L12 2zm0 5.5 7.6 12.5H4.4L12 7.5zM11 11v4h2v-4h-2zm0 5v2h2v-2h-2z" />
+            </svg>
+          </span>
+          <p>
+            <strong>Atenção:</strong> o acesso ao sistema pelo endereço antigo
+            <code>http://10.105.35.172:5005/login</code> foi
+            <strong>desativado permanentemente</strong>. O sistema de ponto foi migrado
+            para a nuvem e agora deve ser acessado exclusivamente pelo novo endereço abaixo.
+          </p>
         </div>
-      </div>
+        <div class="enderecos">
+          <div class="endereco antigo">
+            <span class="rotulo">Antigo<br />inativo</span>
+            <div>
+              <code>http://10.105.35.172:5005/login</code>
+              <span class="nota">Este endereço não responde mais</span>
+            </div>
+          </div>
 
-      <a class="btn" href="https://ponto.praticus.com.br/login">
-        Acessar o sistema no novo endereço <span class="seta" aria-hidden="true">→</span>
-      </a>
+          <div class="endereco novo">
+            <span class="rotulo">Novo<br />oficial</span>
+            <div>
+              <code>https://ponto.praticus.com.br/login</code>
+              <span class="nota">Use este endereço a partir de agora</span>
+            </div>
+            <button class="btn-secundario copiar" type="button" data-copiar="https://ponto.praticus.com.br/login">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z" />
+              </svg>
+              Copiar
+            </button>
+          </div>
+        </div>
 
-      <div class="detalhes">
-        <h3>O que você precisa saber</h3>
-        <ul>
-          <li><span class="check">✔</span> O sistema continua funcionando <strong>com as mesmas regras</strong>: login, horários, escala e políticas de registro de ponto permanecem inalterados.</li>
-          <li><span class="check">✔</span> Utilize o <strong>mesmo usuário e senha</strong> de sempre para acessar o novo endereço.</li>
-          <li><span class="check">✔</span> O sistema agora roda em <strong>nuvem (cloud)</strong>, com mais disponibilidade, segurança e acesso de qualquer lugar.</li>
-          <li><span class="check">✔</span> Atualize seus <strong>favoritos e atalhos</strong> para o novo endereço: <strong>https://ponto.praticus.com.br/login</strong>.</li>
-        </ul>
-      </div>
+        <div class="acoes">
+          <a class="btn" href="https://ponto.praticus.com.br/login">
+            Acessar o sistema no novo endereço
+            <span class="seta" aria-hidden="true">→</span>
+          </a>
+        </div>
 
-      <p class="contador" id="contador">
-        Você será redirecionado automaticamente em <strong id="segundos">10</strong> segundos.
-        <a href="https://ponto.praticus.com.br/login">Clique aqui</a> para ir agora.
-      </p>
+        <div class="detalhes">
+          <h3>O que você precisa saber</h3>
+          <ul>
+            <li>
+              <span class="check" aria-hidden="true">✔</span>
+              <span>O sistema continua funcionando <strong>com as mesmas regras</strong>: login, horários, escala e políticas de registro de ponto permanecem inalterados.</span>
+            </li>
+            <li>
+              <span class="check" aria-hidden="true">✔</span>
+              <span>Utilize o <strong>mesmo usuário e senha</strong> de sempre para acessar o novo endereço.</span>
+            </li>
+            <li>
+              <span class="check" aria-hidden="true">✔</span>
+              <span>O sistema agora roda em <strong>nuvem (cloud)</strong>, com mais disponibilidade, segurança e acesso de qualquer lugar.</span>
+            </li>
+            <li>
+              <span class="check" aria-hidden="true">✔</span>
+              <span>Atualize seus <strong>favoritos e atalhos</strong> para o novo endereço: <strong>https://ponto.praticus.com.br/login</strong>.</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <aside class="lateral">
+        <section class="painel">
+          <h3 class="painel-titulo">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm1-13h-2v6l5 3 1-1.7-4-2.3V7z" />
+            </svg>
+            Redirecionamento
+          </h3>
+          <div class="contagem" id="contagem">
+            <div class="anel">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <defs>
+                  <linearGradient id="gradAnel" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#5eead4" />
+                    <stop offset="1" stop-color="#38bdf8" />
+                  </linearGradient>
+                </defs>
+                <circle class="anel-trilha" cx="60" cy="60" r="52" />
+                <circle class="anel-progresso" id="anel-progresso" cx="60" cy="60" r="52" />
+              </svg>
+              <div class="anel-num">
+                <strong id="segundos">10</strong>
+                <small>segundos</small>
+              </div>
+            </div>
+            <p class="contagem-txt">
+              Você será redirecionado automaticamente em
+              <strong id="segundos-texto">10</strong> segundos.
+              <a href="https://ponto.praticus.com.br/login">Clique aqui</a> para ir agora.
+            </p>
+          </div>
+          <p class="contagem-nota" id="contagem-nota" hidden>
+            Redirecionamento pausado enquanto a música está tocando.
+          </p>
+        </section>
+
+        <section class="painel painel-musica">
+          <h3 class="painel-titulo">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z" />
+            </svg>
+            Música de fundo
+          </h3>
+          <div class="musica-painel" id="musica-painel">
+            <button class="botao-musica" id="btn-musica" type="button" aria-pressed="false">
+              <span class="disco" aria-hidden="true">
+                <svg id="icone-musica" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </span>
+              <span class="texto">
+                <b id="musica-titulo">Ativar música</b>
+                <span id="musica-sub">Toque para ouvir o aviso</span>
+              </span>
+              <span class="igualador" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            </button>
+            <p class="dica-musica" id="dica-musica" hidden>
+              O navegador bloqueou o som automático. Toque em qualquer lugar da página para ouvir.
+            </p>
+          </div>
+        </section>
+      </aside>
     </div>
-
-    <footer class="card-footer">
-      Em caso de dúvidas, entre em contato com o suporte ou com o RH da sua unidade. · Praticus
+    <footer class="rodape">
+      <span>Em caso de dúvidas, entre em contato com o <strong>suporte</strong> ou com o <strong>RH</strong> da sua unidade.</span>
+      <span><strong>Praticus</strong> · Sistema de Ponto</span>
     </footer>
   </main>
 
   <audio id="bg-audio" src="audio.mp3" loop preload="auto" aria-hidden="true"></audio>
+  <div class="toast" id="toast" role="status" aria-live="polite">Endereço copiado</div>
+
+  <button class="flutuante-musica" id="btn-musica-flutuante" type="button" aria-label="Ativar música de fundo">
+    <span class="nota" aria-hidden="true">♪</span>
+    Ativar música
+  </button>
 
   <script>
-    // Música de fundo em loop.
-    // Navegadores (Chrome/Edge/Safari) bloqueiam a reprodução automática
-    // COM SOM até haver interação do usuário. Estratégia:
-    //   1) tenta tocar com som imediatamente;
-    //   2) se for bloqueado, inicia MUDA (permitido) e libera o som
-    //      automaticamente na primeira interação (clique/toque/tecla).
     (function () {
-      var audio = document.getElementById('bg-audio');
-      if (!audio) return;
-      audio.volume = 0.6;
+      'use strict';
 
-      var eventos = ['pointerdown', 'click', 'touchstart', 'touchend', 'keydown'];
-      var destravado = false;
+      var DESTINO = 'https://ponto.praticus.com.br/login';
+      var TOTAL = 10;          // segundos até o redirecionamento automático
+      var VOLUME = 0.55;       // volume final da música
 
-      function liberarSom() {
-        if (destravado) return;
-        destravado = true;
-        audio.muted = false;
-        audio.volume = 0.6;
-        var p = audio.play();
-        if (p && p.catch) p.catch(function () {});
-        eventos.forEach(function (e) {
-          document.removeEventListener(e, liberarSom, true);
-        });
+      /* ---------------- contagem regressiva ---------------- */
+      var segundos = document.getElementById('segundos');
+      var segundosTexto = document.getElementById('segundos-texto');
+      var anel = document.getElementById('anel-progresso');
+      var blocoContagem = document.getElementById('contagem');
+      var notaPausa = document.getElementById('contagem-nota');
+      var CIRC = 2 * Math.PI * 52;
+      var restante = TOTAL;
+      var rodando = true;
+      var encerrado = false;
+
+      function pintarContagem() {
+        var n = Math.max(restante, 0);
+        if (segundos) segundos.textContent = String(n);
+        if (segundosTexto) segundosTexto.textContent = String(n);
+        if (anel) anel.style.strokeDashoffset = String(CIRC * (1 - n / TOTAL));
       }
 
-      eventos.forEach(function (e) {
-        document.addEventListener(e, liberarSom, true);
-      });
+      pintarContagem();
 
-      var p = audio.play();
-      if (p && p.then) {
-        p.then(function () { destravado = true; }).catch(function () {
-          // Autoplay com som bloqueado: inicia mudo para já estar rodando.
-          audio.muted = true;
-          var pm = audio.play();
-          if (pm && pm.catch) pm.catch(function () {});
-        });
-      }
-    })();
-
-    // Redirecionamento automático após 10 segundos.
-    // Para desativar, basta remover este bloco e o parágrafo #contador.
-    (function () {
-      var tempo = 10;
-      var el = document.getElementById('segundos');
-      var contador = setInterval(function () {
-        tempo--;
-        if (el) el.textContent = tempo;
-        if (tempo <= 0) {
-          clearInterval(contador);
-          window.location.href = 'https://ponto.praticus.com.br/login';
+      setInterval(function () {
+        if (!rodando || encerrado) return;
+        restante = restante - 1;
+        pintarContagem();
+        if (restante <= 0) {
+          encerrado = true;
+          window.location.href = DESTINO;
         }
       }, 1000);
+
+      function pausarContagem() {
+        if (encerrado || !rodando) return;
+        rodando = false;
+        if (blocoContagem) blocoContagem.classList.add('pausada');
+        if (notaPausa) notaPausa.hidden = false;
+      }
+
+      function retomarContagem() {
+        if (encerrado || rodando) return;
+        rodando = true;
+        if (blocoContagem) blocoContagem.classList.remove('pausada');
+        if (notaPausa) notaPausa.hidden = true;
+      }
+      /* ---------------- música de fundo ----------------
+         Navegadores (Chrome/Edge/Safari/Firefox) só liberam ÁUDIO COM SOM
+         depois de uma interação do usuário. Fluxo:
+           1) tenta tocar com som de imediato;
+           2) se for bloqueado, toca MUDA (permitido) e mostra a dica;
+           3) no primeiro toque/tecla/scroll, libera o som com fade-in.
+         Enquanto a música está audível, a contagem regressiva pausa. */
+      var audio = document.getElementById('bg-audio');
+      var botao = document.getElementById('btn-musica');
+      var painelMusica = document.getElementById('musica-painel');
+      var dica = document.getElementById('dica-musica');
+      var tituloMusica = document.getElementById('musica-titulo');
+      var subMusica = document.getElementById('musica-sub');
+      var icone = document.getElementById('icone-musica');
+      var flutuante = document.getElementById('btn-musica-flutuante');
+      var desbloqueado = false;
+      var jaTocou = false;
+      var fadeTimer = null;
+
+      function audivel() {
+        return !!audio && !audio.paused && !audio.muted && audio.volume > 0.01;
+      }
+
+      function trocarIcone(tocando) {
+        if (!icone) return;
+        icone.innerHTML = tocando
+          ? '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>'
+          : '<path d="M8 5v14l11-7z"/>';
+      }
+
+      function atualizarInterface() {
+        if (!audio) return;
+        var tocando = audivel();
+        if (botao) botao.setAttribute('aria-pressed', tocando ? 'true' : 'false');
+        if (painelMusica) painelMusica.classList.toggle('tocando', tocando);
+        if (tituloMusica) tituloMusica.textContent = tocando ? 'Pausar música' : 'Ativar música';
+        if (subMusica) {
+          if (tocando) {
+            subMusica.textContent = 'Tocando em loop · toque para pausar';
+          } else if (!audio.paused && audio.muted) {
+            subMusica.textContent = 'Som bloqueado — toque para liberar';
+          } else {
+            subMusica.textContent = 'Toque para ouvir o aviso';
+          }
+        }
+        trocarIcone(tocando);
+        if (tocando) jaTocou = true;
+        if (flutuante) flutuante.hidden = tocando || jaTocou;
+        if (tocando) pausarContagem();
+        else retomarContagem();
+      }
+
+      function fade(alvo) {
+        if (!audio) return;
+        if (fadeTimer) clearInterval(fadeTimer);
+        fadeTimer = setInterval(function () {
+          var v = audio.volume + 0.05;
+          if (v >= alvo) {
+            audio.volume = alvo;
+            clearInterval(fadeTimer);
+            fadeTimer = null;
+          } else {
+            audio.volume = v;
+          }
+        }, 90);
+      }
+
+      function tocar() {
+        if (!audio) return;
+        audio.muted = false;
+        audio.volume = 0.05;
+        var p = audio.play();
+        if (p && p.catch) p.catch(function () {});
+        fade(VOLUME);
+        if (dica) dica.hidden = true;
+      }
+
+      var EVENTOS = ['pointerdown', 'touchstart', 'keydown', 'wheel', 'scroll'];
+
+      function desbloquear(ev) {
+        if (desbloqueado) return;
+        // clique no botão de música é tratado pelo próprio botão
+        if (ev && ev.target && ev.target.closest && ev.target.closest('#btn-musica, #btn-musica-flutuante')) return;
+        desbloqueado = true;
+        tocar();
+        EVENTOS.forEach(function (nome) {
+          document.removeEventListener(nome, desbloquear, true);
+        });
+      }
+
+      function armarDesbloqueio() {
+        EVENTOS.forEach(function (nome) {
+          document.addEventListener(nome, desbloquear, { passive: true, capture: true });
+        });
+      }
+
+      function tentarAutoplay() {
+        if (!audio) return;
+        audio.volume = VOLUME;
+        var p = audio.play();
+        if (!p || !p.then) return;        // navegador antigo: já começou a tocar
+        p.catch(function () {
+          audio.muted = true;             // autoplay mudo é permitido
+          var pm = audio.play();
+          if (pm && pm.catch) pm.catch(function () {});
+          if (dica) dica.hidden = false;
+          armarDesbloqueio();
+          atualizarInterface();
+        });
+      }
+
+      function alternarMusica() {
+        if (!audio) return;
+        desbloqueado = true;
+        EVENTOS.forEach(function (nome) {
+          document.removeEventListener(nome, desbloquear, true);
+        });
+        if (audivel()) audio.pause();
+        else tocar();
+      }
+
+      if (botao) botao.addEventListener('click', alternarMusica);
+      if (flutuante) flutuante.addEventListener('click', alternarMusica);
+
+      if (audio) {
+        ['play', 'playing', 'pause', 'volumechange', 'ended'].forEach(function (ev) {
+          audio.addEventListener(ev, atualizarInterface);
+        });
+        audio.volume = VOLUME;
+        tentarAutoplay();
+        atualizarInterface();
+      }
+
+      // Alguns navegadores liberam o áudio quando a aba volta ao primeiro plano.
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible' && audio && audio.paused && !desbloqueado) {
+          tentarAutoplay();
+        }
+      });
+      /* ---------------- copiar o novo endereço ---------------- */
+      var toast = document.getElementById('toast');
+      var toastTimer = null;
+
+      function mostrarToast(mensagem) {
+        if (!toast) return;
+        toast.textContent = mensagem;
+        toast.classList.add('visivel');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+          toast.classList.remove('visivel');
+        }, 2600);
+      }
+
+      var botaoCopiar = document.querySelector('[data-copiar]');
+      if (botaoCopiar) {
+        botaoCopiar.addEventListener('click', function () {
+          var texto = botaoCopiar.getAttribute('data-copiar');
+
+          function copiarSemApi() {
+            var campo = document.createElement('textarea');
+            campo.value = texto;
+            campo.setAttribute('readonly', '');
+            campo.style.position = 'fixed';
+            campo.style.top = '-1000px';
+            campo.style.opacity = '0';
+            document.body.appendChild(campo);
+            campo.select();
+            var ok = false;
+            try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+            document.body.removeChild(campo);
+            mostrarToast(ok ? 'Endereço copiado' : 'Copie manualmente: ' + texto);
+          }
+
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(texto).then(function () {
+              mostrarToast('Endereço copiado');
+            }, copiarSemApi);
+          } else {
+            copiarSemApi();
+          }
+        });
+      }
     })();
   </script>
 </body>
