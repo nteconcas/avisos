@@ -5,7 +5,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-# Ajuste para a pasta real onde estao app.py, index.html e audio.mp3
+# Ajuste para a pasta real onde estao app.py e index.html
 WorkingDirectory=/root/avisos
 ExecStart=/usr/bin/python3 app.py
 Environment=HOST=0.0.0.0

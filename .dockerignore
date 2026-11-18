@@ -7,6 +7,6 @@ deploy-vps.sh
 diagnostico.sh
 aviso-ponto.service
 .gitattributes
-politicas
-verificar-musica.py
 *.wav
+# música desativada: não entra mais na imagem
+audio.mp3

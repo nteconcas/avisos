@@ -82,7 +82,7 @@ fi
 
 secao "5. Testes HTTP em 127.0.0.1:${PORTA}"
 if command -v curl >/dev/null 2>&1; then
-  for caminho in / /index.html /login /audio.mp3 /healthz /qualquer-coisa; do
+  for caminho in / /index.html /login /healthz /qualquer-coisa; do
     printf '  %-16s -> ' "$caminho"
     curl -s -o /tmp/_diag_body -w 'HTTP %{http_code} | tipo: %{content_type} | bytes: %{size_download}\n' \
       --max-time 5 "http://127.0.0.1:${PORTA}${caminho}" || echo "FALHOU (conexão recusada/timeout)"
@@ -91,13 +91,6 @@ if command -v curl >/dev/null 2>&1; then
   curl -s --max-time 5 "http://127.0.0.1:${PORTA}/" | head -8
 else
   echo "curl não instalado -> apt-get install -y curl"
-fi
-
-secao "5.1 Verificação completa da página + música (sem navegador)"
-if command -v python3 >/dev/null 2>&1 && [ -f verificar-musica.py ]; then
-  python3 verificar-musica.py "http://127.0.0.1:${PORTA}" 2>&1 | sed 's/^/  /'
-else
-  echo "  (precisa de python3 e do verificar-musica.py na pasta atual)"
 fi
 
 secao "6. A página servida é a deste projeto?"

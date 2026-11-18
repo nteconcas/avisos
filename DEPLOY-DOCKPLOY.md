@@ -27,14 +27,12 @@ na **porta 5005**. Há dois cenários:
 avisos/
 ├── app.py              ← servidor Python (só stdlib): aviso em QUALQUER rota, porta 5005
 ├── index.html          ← a página de aviso
-├── audio.mp3           ← música de fundo (WAV original convertido para MP3)
 ├── Dockerfile          ← imagem python:3.12-slim com o app
 ├── docker-compose.yml  ← alternativa (Compose / docker direto), publica 5005:5005
 ├── deploy-vps.sh       ← sobe/valida na 5005 com um comando
-├── verificar-musica.py ← confere página + MP3 pela rede (roda sem navegador)
 ├── diagnostico.sh      ← coleta o estado quando algo não abre
 ├── aviso-ponto.service ← unit do systemd (rodar sem Docker)
-├── politicas/          ← como liberar o autoplay do som nas máquinas
+├── audio.mp3           ← faixa antiga da música (não é mais servida nem copiada na imagem)
 ├── QUICKSTART-VPS.md   ← passo a passo resumido
 └── DEPLOY-DOCKPLOY.md  ← este guia
 ```
@@ -58,7 +56,7 @@ Se o app antigo de ponto ainda estiver rodando na 5005, pare-o
 (`docker stop <container>`, `systemctl stop <serviço>`, etc.).
 
 > **Atalho:** em vez de seguir este guia inteiro, rode `sudo ./deploy-vps.sh`
-> na VPS — ele sobe a página na porta 5005 e testa `/`, `/login`, `/audio.mp3`
+> na VPS — ele sobe a página na porta 5005 e testa `/`, `/login` e `/healthz`
 > e `/healthz`. Detalhes em [`QUICKSTART-VPS.md`](./QUICKSTART-VPS.md).
 >
 > **Sem Docker?** O app é Python puro: `python3 app.py` já sobe em `0.0.0.0:5005`
@@ -116,8 +114,7 @@ Escolha **Dockerfile** e preencha:
 > **Por que Dockerfile e não "Static"?** O tipo *Static* do Dokploy serve os
 > arquivos com um nginx genérico e devolve **404** em `/login`, que é o endereço
 > salvo nos favoritos dos usuários. Aqui quem responde é o `app.py`: **qualquer
-> rota** exibe o aviso (200) e o áudio é servido com suporte a `Range`. O
-> contêiner escuta na porta **5005**.
+> rota** exibe o aviso (200). O contêiner escuta na porta **5005**.
 
 ## 6. Publicar a porta 5005 (aba Advanced → Ports)
 
@@ -149,21 +146,11 @@ curl -s http://10.105.35.172:5005/login | grep -o "<title>.*</title>"
 
 3. Abra no navegador: `http://10.105.35.172:5005/login` → deve aparecer o aviso,
    com redirecionamento automático para `https://ponto.praticus.com.br/login` após 10 s.
-   A música de fundo pede para tocar **com som já no carregamento** e segue em loop
-   até o redirecionamento (a contagem não pausa).
-
-   > **Autoplay com som:** Chrome/Edge bloqueiam som sem interação do usuário por
-   > padrão. A página insiste sozinha e libera no primeiro toque/clique, mas para
-   > tocar automaticamente em todas as máquinas aplique a política
-   > `AutoplayAllowed` / `AutoplayAllowlist` — arquivos prontos e instruções em
-   > [`politicas/README.md`](politicas/README.md).
+   A página **não toca música** (recurso retirado).
 
 > Se quiser confirmar o que está no ar sem abrir o navegador:
 > `curl -s -o /dev/null -w '%{http_code} %{content_type}\n' http://IP:5005/`
 > (esperado: `200 text/html; charset=utf-8`).
->
-> Verificação completa (página + player + MP3 + `Range`), sem navegador:
-> `python3 verificar-musica.py http://IP:5005` → termina em `TUDO OK`.
 
 ### (Opcional) Servir também por um domínio com HTTPS
 

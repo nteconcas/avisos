@@ -1,6 +1,6 @@
 # Rodar na porta 5005 (VPS)
 
-Resumo: este projeto é **uma página de aviso** (HTML + MP3) servida por um
+Resumo: este projeto é **uma página de aviso** (HTML) servida por um
 **app Python mínimo** (`app.py`, só biblioteca padrão). Ele entrega o aviso em
 **qualquer rota** — inclusive `/login`, que é o favorito salvo pelos usuários —
 na porta **5005**. Não há banco, Node, nginx nem dependências para instalar.
@@ -12,11 +12,9 @@ Navegador -> VPS:5005 -> app.py (Python) -> index.html
 | Rota | Resposta |
 |---|---|
 | `/`, `/login`, qualquer caminho | `index.html` com `200` (nunca 404) |
-| `/audio.mp3` | música de fundo, com suporte a `Range` (necessário para o player) |
 | `/healthz` | `200 ok` — usado pelo healthcheck do Docker |
 
-Para conferir **tudo isso de uma vez** (sem navegador, sem Node, sem Docker) existe
-o verificador `verificar-musica.py` — veja a [seção 4](#4-conferir-se-está-mesmo-na-5005).
+> A música de fundo foi **retirada** da página (sem player, sem `audio.mp3`).
 
 ---
 
@@ -56,7 +54,7 @@ sudo ./deploy-vps.sh
 ```
 
 O script constrói a imagem, recria o contêiner, espera ficar saudável e testa
-`/`, `/login`, `/audio.mp3` e `/healthz` (todos precisam dar **200**):
+`/`, `/login` e `/healthz` (todos precisam dar **200**):
 
 ```
 ✔ Página de aviso no ar:  http://10.105.35.172:5005/login
@@ -108,36 +106,6 @@ curl -s -o /dev/null -w '%{http_code} %{content_type}\n' http://127.0.0.1:5005/
 
 De outra máquina da rede: `curl -I http://10.105.35.172:5005/login`
 
-### Verificação completa em 1 comando (recomendada na VPS)
-
-```bash
-cd ~/avisos
-python3 verificar-musica.py                      # dentro da VPS (porta 5005)
-python3 verificar-musica.py http://10.105.35.172:5005   # de qualquer máquina
-```
-
-Ele baixa a página e o MP3 pela rede e confere: rotas `/`, `/login`, rota
-desconhecida e `/healthz` (200 + `text/html`), o `<audio>` com `autoplay`/`loop`
-e a lógica de música/contagem no HTML entregue, e o MP3 (`Content-Type` de áudio,
-`Accept-Ranges`, tamanho real **4.140.409 bytes**, `Range 0-1023` → `206` e sufixo
-`-2048` → `206`). Termina com `TUDO OK` (código 0) ou `FALHAS: n` (código 1).
-
-Saída esperada quando está tudo certo:
-
-```
-  ok    | /audio.mp3 responde 200
-  ok    | aceita Range (necessário ao loop)
-  ok    | o arquivo é um MP3 de verdade
-  ok    | Range 0-1023 -> 206
-TUDO OK: a página e a música estão sendo entregues corretamente.
-```
-
-> O que ele **não** prova é o som automático: isso é o navegador de cada usuário
-> quem decide. Na tela, o painel **Música de fundo** mostra o veredito:
-> “Tocando em loop · toque para pausar” = som liberado; “Som bloqueado — toque
-> para liberar” = falta aplicar a política de autoplay
-> ([`politicas/README.md`](politicas/README.md)).
-
 ---
 
 ## 5. Se a página não aparecer
@@ -151,7 +119,7 @@ sudo ./diagnostico.sh
 
 Ele gera `diagnostico-AAAAMMDD-HHMMSS.txt` com: contêineres, **quem** está
 ouvindo na 5005 (Docker ou `python3 app.py`), md5 do que é servido comparado ao
-`index.html` local, testes HTTP em `/`, `/login`, `/audio.mp3` e `/healthz`,
+`index.html` local, testes HTTP em `/`, `/login` e `/healthz`,
 logs, firewall e um veredito.
 
 | Sintoma | Causa / solução |
@@ -166,7 +134,6 @@ logs, firewall e um veredito.
 | `permission denied ... docker.sock` | Rode com `sudo` ou `sudo usermod -aG docker $USER && newgrp docker`. |
 | Aviso antigo no navegador | O app manda `no-cache`; force `Ctrl+F5`. |
 | Quer trocar o IP/URL do texto | Edite `index.html` e reinicie (`systemctl restart aviso-ponto` ou `sudo ./deploy-vps.sh`). |
-| Música **não toca sozinha** (só depois de clicar) | Comportamento padrão do Chrome/Edge. Aplicar a política de autoplay nas máquinas: veja [`politicas/README.md`](politicas/README.md). |
 
 > Mudou `index.html` ou `app.py`? Com Docker é obrigatório **rebuildar**
 > (`sudo ./deploy-vps.sh` ou `docker compose up -d --build`). `docker restart`

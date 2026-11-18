@@ -8,7 +8,7 @@
 #   PORTA_HOST=8080 ./deploy-vps.sh   # muda a porta, se precisar
 #
 # O script: confere Docker, libera/recria o contêiner, faz build, sobe,
-# espera ficar saudável e testa /, /login, /audio.mp3 e /healthz.
+# espera ficar saudável e testa /, /login e /healthz.
 # ---------------------------------------------------------------------------
 set -uo pipefail
 
@@ -149,14 +149,12 @@ ok "Serviço respondendo."
 # --- 7. Testes de aceitação ----------------------------------------------
 CODIGO_RAIZ=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORTA_HOST}/")
 CODIGO_LOGIN=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORTA_HOST}/login")
-CODIGO_AUDIO=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORTA_HOST}/audio.mp3")
 CODIGO_SAUDE=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORTA_HOST}/healthz")
 TIPO_RAIZ=$(curl -s -o /dev/null -w '%{content_type}' "http://127.0.0.1:${PORTA_HOST}/")
 TITULO=$(curl -fsS "http://127.0.0.1:${PORTA_HOST}/login" 2>/dev/null | grep -o '<title>[^<]*</title>' | head -1)
 
 printf '   /          -> HTTP %s (%s)\n' "$CODIGO_RAIZ" "${TIPO_RAIZ:-?}"
 printf '   /login     -> HTTP %s  (precisa ser 200: é o favorito dos usuários)\n' "$CODIGO_LOGIN"
-printf '   /audio.mp3 -> HTTP %s\n' "$CODIGO_AUDIO"
 printf '   /healthz   -> HTTP %s\n' "$CODIGO_SAUDE"
 printf '   título     -> %s\n' "${TITULO:-<não encontrado>}"
 
@@ -172,17 +170,6 @@ fi
 
 info "Mapeamento publicado pelo Docker:"
 docker port "$NOME_CONTAINER" 2>/dev/null | sed 's/^/    /' || true
-
-# --- 7.1 Verificação completa (página + player + MP3 + Range) --------------
-if command -v python3 >/dev/null 2>&1 && [ -f verificar-musica.py ]; then
-  echo
-  info "Conferindo página + música com verificar-musica.py:"
-  if python3 verificar-musica.py "http://127.0.0.1:${PORTA_HOST}" 2>&1 | sed 's/^/    /'; then
-    : # tudo certo
-  else
-    aviso "A verificação apontou FALHAs acima (a página pode estar no ar mesmo assim)."
-  fi
-fi
 
 IP_DETECTADO=$(hostname -I 2>/dev/null | awk '{print $1}')
 echo

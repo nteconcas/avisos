@@ -14,8 +14,8 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# Só o necessário: o servidor, a página e a música
-COPY app.py index.html audio.mp3 ./
+# Só o necessário: o servidor e a página
+COPY app.py index.html ./
 
 # Usuário sem privilégios (UID numérico: não precisa existir em /etc/passwd)
 USER 10001:10001

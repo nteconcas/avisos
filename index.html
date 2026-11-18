@@ -427,64 +427,6 @@
     }
     .contagem-txt a { color: var(--brand); font-weight: 700; text-decoration: none; border-bottom: 1px solid rgba(45, 212, 191, 0.4); }
     .contagem-txt a:hover { border-bottom-color: var(--brand); }
-    /* ---------- música ---------- */
-    .musica-painel { display: grid; gap: 11px; }
-    .botao-musica {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-      font: inherit;
-      text-align: left;
-      cursor: pointer;
-      padding: 11px 13px;
-      border-radius: 14px;
-      color: #e8fffb;
-      background: rgba(45, 212, 191, 0.10);
-      border: 1px solid rgba(45, 212, 191, 0.35);
-      transition: background 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.2s var(--ease);
-    }
-    .botao-musica:focus-visible { outline: 3px solid #5eead4; outline-offset: 2px; }
-    .botao-musica .texto { display: grid; gap: 2px; min-width: 0; }
-    .botao-musica .texto b { font-size: 0.88rem; font-weight: 680; }
-    .botao-musica .texto span { font-size: 0.7rem; color: var(--muted); }
-    .botao-musica .disco {
-      flex-shrink: 0;
-      width: 34px; height: 34px;
-      border-radius: 50%;
-      display: grid; place-items: center;
-      background: linear-gradient(150deg, #2dd4bf, #0f766e);
-      color: #04201d;
-      box-shadow: 0 10px 20px -12px rgba(45, 212, 191, 0.95);
-    }
-    .igualador { display: inline-flex; align-items: flex-end; gap: 2px; height: 15px; }
-    .igualador i {
-      display: block;
-      width: 3px;
-      height: 5px;
-      border-radius: 2px;
-      background: currentColor;
-      opacity: 0.45;
-      transition: opacity 0.2s linear;
-    }
-    .tocando .igualador i { opacity: 1; animation: pulsar-barra 0.9s ease-in-out infinite; }
-    .tocando .igualador i:nth-child(2) { animation-delay: 0.15s; }
-    .tocando .igualador i:nth-child(3) { animation-delay: 0.3s; }
-    .tocando .igualador i:nth-child(4) { animation-delay: 0.45s; }
-    @keyframes pulsar-barra {
-      0%, 100% { height: 4px; }
-      50% { height: 15px; }
-    }
-    .dica-musica {
-      font-size: 0.72rem;
-      line-height: 1.5;
-      color: #ffd28a;
-      background: rgba(245, 158, 11, 0.12);
-      border: 1px dashed rgba(245, 158, 11, 0.4);
-      border-radius: 10px;
-      padding: 8px 10px;
-    }
-    .dica-musica[hidden] { display: none; }
 
     /* ---------- rodapé ---------- */
     .rodape {
@@ -527,40 +469,10 @@
     /* ---------- detalhes finos ---------- */
     .endereco .btn-secundario { width: auto; white-space: nowrap; padding: 9px 13px; }
 
-    /* ---------- botão flutuante da música ---------- */
-    .flutuante-musica {
-      position: fixed;
-      right: max(14px, env(safe-area-inset-right));
-      bottom: max(14px, env(safe-area-inset-bottom));
-      z-index: 18;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font: inherit;
-      font-size: 0.8rem;
-      font-weight: 750;
-      color: #04201d;
-      background: linear-gradient(120deg, #5eead4, #2dd4bf);
-      border: 0;
-      border-radius: 999px;
-      padding: 11px 16px;
-      cursor: pointer;
-      box-shadow: 0 18px 36px -14px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-      animation: chamar 2.6s ease-in-out infinite;
-    }
-    .flutuante-musica[hidden] { display: none; }
-    .flutuante-musica .nota { font-size: 1.05rem; line-height: 1; }
-    .flutuante-musica:focus-visible { outline: 3px solid #99f6e4; outline-offset: 3px; }
-    @keyframes chamar {
-      0%, 100% { transform: translateY(0); box-shadow: 0 18px 36px -14px rgba(0, 0, 0, 0.9); }
-      50% { transform: translateY(-4px); box-shadow: 0 22px 42px -14px rgba(45, 212, 191, 0.75); }
-    }
-
     /* ---------- responsivo ---------- */
     @media (hover: hover) and (pointer: fine) {
       .btn:hover { transform: translateY(-2px); filter: brightness(1.04); }
       .btn:hover .seta { transform: translateX(4px); }
-      .botao-musica:hover { background: rgba(45, 212, 191, 0.18); border-color: rgba(45, 212, 191, 0.6); }
       .btn-secundario:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.24); }
       .novo:hover { transform: translateY(-1px); }
     }
@@ -602,7 +514,7 @@
 
     @media print {
       body { background: #fff; color: #111; display: block; }
-      .aurora, .grao, .toast, .painel-musica, .acoes, .flutuante-musica { display: none !important; }
+      .aurora, .grao, .toast, .acoes { display: none !important; }
       .cartao { box-shadow: none; border: 1px solid #ccc; background: #fff; }
       .aviso, .endereco, .painel { background: #f7f7f7; color: #111; }
       .aviso strong, .endereco code, .lead { color: #111; }
@@ -750,32 +662,6 @@
             </p>
           </div>
         </section>
-
-        <section class="painel painel-musica">
-          <h3 class="painel-titulo">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z" />
-            </svg>
-            Música de fundo
-          </h3>
-          <div class="musica-painel" id="musica-painel">
-            <button class="botao-musica" id="btn-musica" type="button" aria-pressed="false">
-              <span class="disco" aria-hidden="true">
-                <svg id="icone-musica" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </span>
-              <span class="texto">
-                <b id="musica-titulo">Ativar música</b>
-                <span id="musica-sub">Começa sozinha · em loop</span>
-              </span>
-              <span class="igualador" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-            </button>
-            <p class="dica-musica" id="dica-musica" hidden>
-              O navegador bloqueou o som automático. Toque em qualquer lugar da página para ouvir.
-            </p>
-          </div>
-        </section>
       </aside>
     </div>
     <footer class="rodape">
@@ -784,13 +670,7 @@
     </footer>
   </main>
 
-  <audio id="bg-audio" src="audio.mp3" loop autoplay preload="auto" aria-hidden="true"></audio>
   <div class="toast" id="toast" role="status" aria-live="polite">Endereço copiado</div>
-
-  <button class="flutuante-musica" id="btn-musica-flutuante" type="button" aria-label="Ativar música de fundo">
-    <span class="nota" aria-hidden="true">♪</span>
-    Ativar música
-  </button>
 
   <script>
     (function () {
@@ -798,7 +678,6 @@
 
       var DESTINO = 'https://ponto.praticus.com.br/login';
       var TOTAL = 10;          // segundos até o redirecionamento automático
-      var VOLUME = 0.55;       // volume final da música
 
       /* ---------------- contagem regressiva ---------------- */
       var segundos = document.getElementById('segundos');
@@ -817,240 +696,17 @@
 
       pintarContagem();
 
-      /* A contagem NUNCA pausa: a música toca até o redirecionamento. */
+      /* Conta 10 → 0 e redireciona. */
       setInterval(function () {
         if (encerrado) return;
         restante = restante - 1;
         pintarContagem();
         if (restante <= 0) {
           encerrado = true;
-          window.location.href = DESTINO;   // a música só para junto com a página
+          window.location.href = DESTINO;
         }
       }, 1000);
-      /* ---------------- música de fundo ----------------
-         Objetivo: a música toca SOZINHA, com som, e segue tocando até o
-         redirecionamento. Fluxo:
-           1) pede play() COM SOM já no carregamento (é o caso normal quando a
-              política AutoplayAllowed está aplicada — ver pasta politicas/);
-           2) se o navegador recusar, mostra a dica e tenta manter a faixa em
-              mudo (Chrome/Edge exigem gesto até para áudio mudo; Firefox e
-              Safari costumam permitir);
-           3) insiste com som a cada segundo (até 5x) e em focus/pageshow/aba
-              visível, para o som entrar sozinho assim que o navegador liberar;
-           4) qualquer toque/clique/tecla/scroll libera o som na hora (fade-in).
-         A contagem NÃO pausa: a música vai até o redirecionamento. */
-      var audio = document.getElementById('bg-audio');
-      var botao = document.getElementById('btn-musica');
-      var painelMusica = document.getElementById('musica-painel');
-      var dica = document.getElementById('dica-musica');
-      var tituloMusica = document.getElementById('musica-titulo');
-      var subMusica = document.getElementById('musica-sub');
-      var icone = document.getElementById('icone-musica');
-      var flutuante = document.getElementById('btn-musica-flutuante');
-      var desbloqueado = false;
-      var desbloqueioArmado = false;
-      var somBloqueado = false;
-      var jaTocou = false;
-      var fadeTimer = null;
-      var retentativa = null;
-      var tentativas = 0;
-      var MAX_TENTATIVAS = 5;    // ~5 s: depois disso só foco, aba visível ou gesto
 
-      function audivel() {
-        return !!audio && !audio.paused && !audio.muted && audio.volume > 0.01;
-      }
-
-      function trocarIcone(tocando) {
-        if (!icone) return;
-        icone.innerHTML = tocando
-          ? '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>'
-          : '<path d="M8 5v14l11-7z"/>';
-      }
-
-      function atualizarInterface() {
-        if (!audio) return;
-        var tocando = audivel();
-        if (botao) botao.setAttribute('aria-pressed', tocando ? 'true' : 'false');
-        if (painelMusica) painelMusica.classList.toggle('tocando', tocando);
-        if (tituloMusica) tituloMusica.textContent = tocando ? 'Pausar música' : 'Ativar música';
-        if (subMusica) {
-          if (tocando) {
-            subMusica.textContent = 'Tocando em loop · toque para pausar';
-          } else if (somBloqueado) {
-            subMusica.textContent = 'Som bloqueado — toque para liberar';
-          } else {
-            subMusica.textContent = 'Começa sozinha · em loop';
-          }
-        }
-        trocarIcone(tocando);
-        if (tocando) jaTocou = true;
-        if (flutuante) flutuante.hidden = tocando || jaTocou;
-      }
-
-      function fade(alvo) {
-        if (!audio) return;
-        if (fadeTimer) clearInterval(fadeTimer);
-        fadeTimer = setInterval(function () {
-          var v = audio.volume + 0.05;
-          if (v >= alvo) {
-            audio.volume = alvo;
-            clearInterval(fadeTimer);
-            fadeTimer = null;
-          } else {
-            audio.volume = v;
-          }
-        }, 90);
-      }
-
-      /* Estado comum de "o navegador não liberou o som": fica em mudo (quando o
-         navegador permite), mostra a dica e rearma o desbloqueio por gesto. */
-      function falhouLiberacao() {
-        somBloqueado = true;
-        desbloqueado = false;            // um novo gesto pode tentar de novo
-        if (audio) audio.muted = true;
-        setTimeout(retomarMudo, 150);    // o Chrome pausa logo após recusar
-        if (dica) dica.hidden = false;
-        armarDesbloqueio();
-        atualizarInterface();
-      }
-
-      function tocar() {
-        if (!audio) return;
-        audio.muted = false;
-        audio.volume = 0.05;
-        var p = audio.play();
-        if (p && p.catch) p.catch(falhouLiberacao);
-        fade(VOLUME);
-        if (dica) dica.hidden = true;
-        somBloqueado = false;
-      }
-
-      var EVENTOS = ['pointerdown', 'touchstart', 'keydown', 'wheel', 'scroll'];
-      var tentando = false;
-      var ultimaTentativa = 0;
-
-      function desbloquear(ev) {
-        if (desbloqueado) return;
-        // clique no botão de música é tratado pelo próprio botão
-        if (ev && ev.target && ev.target.closest && ev.target.closest('#btn-musica, #btn-musica-flutuante')) return;
-        desbloqueado = true;
-        pararRetentativas();
-        pararDesbloqueio();
-        tocar();
-      }
-
-      function armarDesbloqueio() {
-        if (desbloqueioArmado) return;
-        desbloqueioArmado = true;
-        EVENTOS.forEach(function (nome) {
-          document.addEventListener(nome, desbloquear, { passive: true, capture: true });
-        });
-      }
-
-      function pararDesbloqueio() {
-        if (!desbloqueioArmado) return;
-        desbloqueioArmado = false;
-        EVENTOS.forEach(function (nome) {
-          document.removeEventListener(nome, desbloquear, true);
-        });
-      }
-
-      function pararRetentativas() {
-        if (retentativa) clearInterval(retentativa);
-        retentativa = null;
-      }
-
-      /* Se o navegador permitir áudio mudo, mantém a faixa tocando (sem perder o
-         lugar). Chrome/Edge pausam a mídia quando o desmute é recusado. */
-      function retomarMudo() {
-        if (!audio || audivel() || desbloqueado || !somBloqueado || encerrado) return;
-        audio.muted = true;
-        var p = audio.play();
-        if (p && p.catch) p.catch(function () {});
-      }
-
-      /* Pede a música COM SOM. Se o navegador recusar, volta ao modo mudo e
-         deixa a dica + o desbloqueio por gesto armados. */
-      function tentarComSom() {
-        if (!audio || audivel() || tentando) return;
-        var agora = Date.now ? Date.now() : new Date().getTime();
-        if (agora - ultimaTentativa < 150) return;   // evita rajada de tentativas
-        ultimaTentativa = agora;
-        tentando = true;
-        audio.muted = false;
-        audio.volume = VOLUME;
-        var p = audio.play();
-        if (!p || !p.then) {          // navegador antigo: já começou a tocar
-          tentando = false;
-          atualizarInterface();
-          return;
-        }
-        p.then(function () {
-          tentando = false;
-          tentativas = 0;
-          somBloqueado = false;
-          pararRetentativas();
-          pararDesbloqueio();
-          if (dica) dica.hidden = true;
-          atualizarInterface();
-        }, function () {
-          tentando = false;
-          falhouLiberacao();
-        });
-      }
-
-      /* Insiste de segundo em segundo: o som entra sozinho assim que o
-         navegador permitir (política de autoplay, 2ª visita, MEI etc.). */
-      function armarRetentativas() {
-        if (retentativa) return;
-        retentativa = setInterval(function () {
-          tentativas = tentativas + 1;
-          if (audivel() || desbloqueado || tentativas > MAX_TENTATIVAS) {
-            pararRetentativas();
-            return;
-          }
-          tentarComSom();
-        }, 1000);
-      }
-
-      function alternarMusica() {
-        if (!audio) return;
-        desbloqueado = true;
-        pararRetentativas();
-        pararDesbloqueio();
-        if (audivel()) audio.pause();
-        else tocar();          // gesto do usuário: som na hora, com fade-in
-      }
-
-      if (botao) botao.addEventListener('click', alternarMusica);
-      if (flutuante) flutuante.addEventListener('click', alternarMusica);
-
-      if (audio) {
-        ['play', 'playing', 'pause', 'volumechange', 'ended'].forEach(function (ev) {
-          audio.addEventListener(ev, atualizarInterface);
-        });
-        // keep-alive do modo mudo: se o navegador pausar, retoma em mudo
-        audio.addEventListener('pause', function () {
-          if (somBloqueado && !desbloqueado) setTimeout(retomarMudo, 150);
-        });
-        audio.volume = VOLUME;
-        tentarComSom();          // 1ª tentativa: com som, já no carregamento
-        armarRetentativas();
-        atualizarInterface();
-      }
-
-      // Sempre que a página volta ao foco/primeiro plano, tenta o som de novo.
-      function tentarDeNovo() {
-        if (audio && !audivel() && !desbloqueado) tentarComSom();
-      }
-
-      document.addEventListener('visibilitychange', function () {
-        if (document.visibilityState === 'visible') tentarDeNovo();
-      });
-      if (window.addEventListener) {
-        window.addEventListener('focus', tentarDeNovo);
-        window.addEventListener('pageshow', tentarDeNovo);
-      }
       /* ---------------- copiar o novo endereço ---------------- */
       var toast = document.getElementById('toast');
       var toastTimer = null;

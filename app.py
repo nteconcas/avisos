@@ -3,8 +3,6 @@
 
 Única função: entregar a página de aviso (index.html) em QUALQUER rota,
 inclusive /login, que é o endereço salvo nos favoritos dos usuários.
-Também entrega o audio.mp3 (com suporte a Range, necessário para o
-navegador tocar o áudio em loop).
 
 Sem dependências externas: usa apenas a biblioteca padrão (Python 3.8+).
 
@@ -29,14 +27,12 @@ from urllib.parse import unquote, urlsplit
 
 BASE_DIR = Path(__file__).resolve().parent
 INDEX = BASE_DIR / "index.html"
-AUDIO = BASE_DIR / "audio.mp3"
 
 # Whitelist: só estes arquivos podem ser baixados. Qualquer outra rota
 # (inclusive /app.py ou tentativa de ../etc/passwd) cai no aviso.
 ARQUIVOS = {
     "/": INDEX,
     "/index.html": INDEX,
-    "/audio.mp3": AUDIO,
 }
 
 HOST = os.environ.get("HOST", "0.0.0.0")
@@ -46,10 +42,10 @@ BLOCO = 64 * 1024
 
 
 class AvisoHandler(BaseHTTPRequestHandler):
-    """Responde GET/HEAD: página de aviso, áudio e healthcheck."""
+    """Responde GET/HEAD: página de aviso e healthcheck."""
 
-    server_version = "AvisoPonto/2.0"
-    protocol_version = "HTTP/1.1"  # keep-alive (página + áudio na mesma conexão)
+    server_version = "AvisoPonto/2.1"
+    protocol_version = "HTTP/1.1"  # keep-alive
 
     # ------------------------------------------------------------------ rotas
     def do_GET(self) -> None:  # noqa: N802 (nome exigido pela stdlib)
@@ -77,7 +73,7 @@ class AvisoHandler(BaseHTTPRequestHandler):
             arquivo = ARQUIVOS.get(caminho, INDEX)  # rota desconhecida -> aviso
             self._servir(arquivo, head=head)
         except (BrokenPipeError, ConnectionResetError):
-            self.close_connection = True  # navegador cancelou (ex.: áudio)
+            self.close_connection = True  # navegador cancelou a requisição
         except Exception as exc:  # nunca derrubar o servidor por 1 requisição
             self.log_error("erro inesperado em %s: %s", self.path, exc)
             self.close_connection = True
@@ -199,7 +195,7 @@ def main() -> int:
 
     print(f"Página de aviso no ar em http://{HOST}:{PORT}/  (Ctrl+C para parar)")
     print("  /login e qualquer outra rota -> index.html")
-    print("  áudio: /audio.mp3  |  saúde: /healthz")
+    print("  saúde: /healthz")
     try:
         servidor.serve_forever()
     finally:
