@@ -1,0 +1,3 @@
+# Relatórios gerados pelo diagnostico.sh
+diagnostico-*.txt
+*.log

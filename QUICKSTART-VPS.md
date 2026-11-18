@@ -88,6 +88,37 @@ De outra máquina da rede: `curl -I http://10.105.35.172:5005/login`
 
 ---
 
+### 5.1 "A página não aparece" — diagnóstico automático
+
+Rode na VPS (não altera nada, só coleta e mostra):
+
+```bash
+chmod +x diagnostico.sh
+sudo ./diagnostico.sh
+```
+
+Ele gera `diagnostico-AAAAMMDD-HHMMSS.txt` com: contêineres, o que está
+ouvindo na 5005, `docker port`, o `nginx.conf` **de dentro** do contêiner,
+testes HTTP em `/`, `/index.html`, `/login` e `/audio.mp3`, logs, firewall e
+um veredito ("funciona local, problema é acesso externo" vs "não está sendo
+servida").
+
+As causas mais comuns, em ordem:
+
+| O que aparece | Causa | Correção |
+|---|---|---|
+| Página padrão **"Welcome to nginx!"** | subiu a imagem `nginx` pura, sem o nosso `nginx.conf` — ou outro serviço está na 5005 | `sudo ./deploy-vps.sh` (sempre constrói a imagem deste repo) |
+| **404** em `/login` | servidor estático simples (`python -m http.server`) ou build *Static* do Dokploy | use o build **Dockerfile**: o `try_files` do projeto resolve qualquer rota |
+| **Conexão recusada / timeout** | nada ouvindo na 5005, firewall ou IP errado | `ss -ltnp \| grep 5005`, `sudo ufw allow 5005/tcp`, liberar no provedor |
+| Navegador **baixa o arquivo** ou mostra o código-fonte | `Content-Type` errado | já corrigido no `nginx.conf` (`default_type text/html; charset utf-8`) — **rebuilde** com `./deploy-vps.sh` |
+| Aparece o **sistema antigo** de ponto | outro contêiner/app ainda na 5005 | `docker ps` e pare o antigo |
+
+> Depois de mexer no `nginx.conf` ou no `index.html` é obrigatório reconstruir
+> a imagem (`./deploy-vps.sh` ou `docker compose up -d --build`). Só
+> `docker restart` **não** aplica mudanças de arquivo.
+
+---
+
 ## 6. Comandos do dia a dia
 
 ```bash
