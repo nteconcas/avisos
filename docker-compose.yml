@@ -1,0 +1,11 @@
+# Alternativa para deploy via Dokploy (tipo "Compose") ou docker compose direto.
+# Publica a página na porta 5005 do host, mantendo o endereço antigo:
+#   http://10.105.35.172:5005/login
+services:
+  aviso-ponto:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5005:80"
+    restart: unless-stopped

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aviso — Sistema de Ponto migrado | Praticus</title>
+  <meta name="description" content="O endereço http://10.105.35.172:5005/login foi desativado. Acesse o sistema de ponto pelo novo endereço: https://ponto.praticus.com.br/login" />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f766e'/%3E%3Ccircle cx='32' cy='34' r='16' fill='none' stroke='white' stroke-width='4'/%3E%3Cpath d='M32 26v8l6 4' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --brand: #0f766e;
+      --brand-dark: #115e59;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --warning-bg: #fef3c7;
+      --warning-border: #f59e0b;
+      --warning-text: #92400e;
+      --old: #dc2626;
+      --new: #059669;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(160deg, #0f766e 0%, #134e4a 45%, #0f172a 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: var(--text);
+    }
+    .card {
+      background: var(--card);
+      width: 100%;
+      max-width: 680px;
+      border-radius: 20px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+    .card-header {
+      background: var(--brand);
+      color: #fff;
+      padding: 22px 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .logo {
+      width: 44px;
+      height: 44px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .card-header h1 { font-size: 1.25rem; font-weight: 600; letter-spacing: 0.3px; }
+    .card-header p { font-size: 0.85rem; opacity: 0.85; margin-top: 2px; }
+    .card-body { padding: 32px; }
+    .badge-cloud {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 999px;
+      margin-bottom: 18px;
+    }
+    h2 { font-size: 1.5rem; margin-bottom: 14px; line-height: 1.3; }
+    .aviso {
+      background: var(--warning-bg);
+      border-left: 5px solid var(--warning-border);
+      color: var(--warning-text);
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      margin-bottom: 22px;
+      line-height: 1.55;
+    }
+    .aviso strong { color: #78350f; }
+    .enderecos {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 26px;
+    }
+    .endereco {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-size: 0.92rem;
+    }
+    .endereco .rotulo {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      flex-shrink: 0;
+      width: 86px;
+    }
+    .endereco code {
+      font-family: "Consolas", "Menlo", monospace;
+      font-size: 0.92rem;
+      word-break: break-all;
+    }
+    .antigo {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #7f1d1d;
+    }
+    .antigo .rotulo { color: var(--old); }
+    .antigo code { text-decoration: line-through; opacity: 0.75; }
+    .novo {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #064e3b;
+    }
+    .novo .rotulo { color: var(--new); }
+    .btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background: var(--brand);
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.05rem;
+      font-weight: 600;
+      padding: 16px 24px;
+      border-radius: 12px;
+      transition: background 0.2s ease, transform 0.15s ease;
+    }
+    .btn:hover { background: var(--brand-dark); transform: translateY(-1px); }
+    .btn .seta { margin-left: 8px; }
+    .detalhes {
+      margin-top: 26px;
+      padding-top: 22px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .detalhes h3 {
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .detalhes ul { list-style: none; }
+    .detalhes li {
+      display: flex;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 10px;
+    }
+    .detalhes li .check {
+      color: var(--new);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .contador {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .contador a { color: var(--brand); font-weight: 600; text-decoration: none; }
+    .card-footer {
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      padding: 16px 32px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    @media (max-width: 480px) {
+      .card-body { padding: 24px 20px; }
+      .card-header { padding: 18px 20px; }
+      h2 { font-size: 1.25rem; }
+      .endereco { flex-direction: column; align-items: flex-start; gap: 4px; }
+      .endereco .rotulo { width: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <header class="card-header">
+      <div class="logo" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="34" r="16" stroke="white" stroke-width="4"/>
+          <path d="M32 26v8l6 4" stroke="white" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Praticus — Sistema de Ponto</h1>
+        <p>Comunicado importante aos usuários</p>
+      </div>
+    </header>
+
+    <div class="card-body">
+      <span class="badge-cloud">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
+        </svg>
+        Agora em nuvem (cloud)
+      </span>
+
+      <h2>Este endereço foi desativado</h2>
+
+      <div class="aviso">
+        <strong>Atenção:</strong> o acesso ao sistema pelo endereço antigo
+        <strong>http://10.105.35.172:5005/login</strong> foi
+        <strong>desativado permanentemente</strong>. O sistema de ponto foi migrado
+        para a nuvem e agora deve ser acessado exclusivamente pelo novo endereço abaixo.
+      </div>
+
+      <div class="enderecos">
+        <div class="endereco antigo">
+          <span class="rotulo">Antigo<br />(inativo)</span>
+          <code>http://10.105.35.172:5005/login</code>
+        </div>
+        <div class="endereco novo">
+          <span class="rotulo">Novo<br />(oficial)</span>
+          <code>https://ponto.praticus.com.br/login</code>
+        </div>
+      </div>
+
+      <a class="btn" href="https://ponto.praticus.com.br/login">
+        Acessar o sistema no novo endereço <span class="seta" aria-hidden="true">→</span>
+      </a>
+
+      <div class="detalhes">
+        <h3>O que você precisa saber</h3>
+        <ul>
+          <li><span class="check">✔</span> O sistema continua funcionando <strong>com as mesmas regras</strong>: login, horários, escala e políticas de registro de ponto permanecem inalterados.</li>
+          <li><span class="check">✔</span> Utilize o <strong>mesmo usuário e senha</strong> de sempre para acessar o novo endereço.</li>
+          <li><span class="check">✔</span> O sistema agora roda em <strong>nuvem (cloud)</strong>, com mais disponibilidade, segurança e acesso de qualquer lugar.</li>
+          <li><span class="check">✔</span> Atualize seus <strong>favoritos e atalhos</strong> para o novo endereço: <strong>https://ponto.praticus.com.br/login</strong>.</li>
+        </ul>
+      </div>
+
+      <p class="contador" id="contador">
+        Você será redirecionado automaticamente em <strong id="segundos">10</strong> segundos.
+        <a href="https://ponto.praticus.com.br/login">Clique aqui</a> para ir agora.
+      </p>
+    </div>
+
+    <footer class="card-footer">
+      Em caso de dúvidas, entre em contato com o suporte ou com o RH da sua unidade. · Praticus
+    </footer>
+  </main>
+
+  <audio id="bg-audio" src="audio.mp3" autoplay loop preload="auto" playsinline aria-hidden="true"></audio>
+
+  <script>
+    // Música de fundo em loop. Os navegadores podem bloquear a reprodução
+    // automática com som; nesse caso o áudio inicia na primeira interação
+    // do usuário (clique, toque, tecla, rolagem ou movimento do mouse).
+    (function () {
+      var audio = document.getElementById('bg-audio');
+      if (!audio) return;
+      audio.volume = 0.6;
+
+      var tentarTocar = function () {
+        var p = audio.play();
+        if (p && p.catch) p.catch(function () { /* aguarda interação do usuário */ });
+      };
+
+      tentarTocar();
+
+      var eventos = ['click', 'touchstart', 'keydown', 'scroll', 'mousemove'];
+      var liberar = function () {
+        tentarTocar();
+        eventos.forEach(function (e) {
+          window.removeEventListener(e, liberar);
+        });
+      };
+      eventos.forEach(function (e) {
+        window.addEventListener(e, liberar, { passive: true });
+      });
+
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) tentarTocar();
+      });
+    })();
+
+    // Redirecionamento automático após 10 segundos.
+    // Para desativar, basta remover este bloco e o parágrafo #contador.
+    (function () {
+      var tempo = 10;
+      var el = document.getElementById('segundos');
+      var contador = setInterval(function () {
+        tempo--;
+        if (el) el.textContent = tempo;
+        if (tempo <= 0) {
+          clearInterval(contador);
+          window.location.href = 'https://ponto.praticus.com.br/login';
+        }
+      }, 1000);
+    })();
+  </script>
+</body>
+</html>
