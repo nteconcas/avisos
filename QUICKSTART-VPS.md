@@ -133,6 +133,7 @@ logs, firewall e um veredito.
 | `permission denied ... docker.sock` | Rode com `sudo` ou `sudo usermod -aG docker $USER && newgrp docker`. |
 | Aviso antigo no navegador | O app manda `no-cache`; force `Ctrl+F5`. |
 | Quer trocar o IP/URL do texto | Edite `index.html` e reinicie (`systemctl restart aviso-ponto` ou `sudo ./deploy-vps.sh`). |
+| Música **não toca sozinha** (só depois de clicar) | Comportamento padrão do Chrome/Edge. Aplicar a política de autoplay nas máquinas: veja [`politicas/README.md`](politicas/README.md). |
 
 > Mudou `index.html` ou `app.py`? Com Docker é obrigatório **rebuildar**
 > (`sudo ./deploy-vps.sh` ou `docker compose up -d --build`). `docker restart`

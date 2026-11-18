@@ -6,3 +6,6 @@
 *.service text eol=lf
 Dockerfile text eol=lf
 *.yml  text eol=lf
+
+# Arquivos .reg são UTF-16LE (formato exigido pelo regedit): não converter.
+*.reg binary
