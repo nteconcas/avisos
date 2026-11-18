@@ -1,4 +1,7 @@
 .git
 DEPLOY-DOCKPLOY.md
+QUICKSTART-VPS.md
 docker-compose.yml
+deploy-vps.sh
+.gitattributes
 *.wav

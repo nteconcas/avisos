@@ -1,11 +1,20 @@
-# Alternativa para deploy via Dokploy (tipo "Compose") ou docker compose direto.
-# Publica a página na porta 5005 do host, mantendo o endereço antigo:
+# Deploy da página de aviso (Dokploy tipo "Compose" ou docker compose direto).
+# Publica a página na porta 5005 do host, em TODAS as interfaces, mantendo o
+# endereço antigo acessível:
 #   http://10.105.35.172:5005/login
+#
+# Subir/atualizar:  docker compose up -d --build
+# Ver logs:         docker compose logs -f
+# Derrubar:         docker compose down
 services:
   aviso-ponto:
     build:
       context: .
       dockerfile: Dockerfile
+    image: aviso-ponto:latest
+    container_name: aviso-ponto
+    # 0.0.0.0 = aceita conexão de qualquer interface da VPS (não só localhost).
+    # 5005 = porta do host/VPS (pode vir da env PORTA_HOST) | 80 = nginx no contêiner.
     ports:
-      - "5005:80"
+      - "0.0.0.0:${PORTA_HOST:-5005}:80"
     restart: unless-stopped

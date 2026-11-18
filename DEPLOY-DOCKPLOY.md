@@ -50,6 +50,10 @@ ss -tlnp | grep -E ':(80|443|3000|5005)\b'
 Se o app antigo de ponto ainda estiver rodando na 5005, pare-o
 (`docker stop <container>`, `systemctl stop <serviço>`, etc.).
 
+> **Atalho:** em vez de seguir este guia inteiro, rode `sudo ./deploy-vps.sh`
+> na VPS — ele sobe a página na porta 5005 e testa `/` e `/login`.
+> Detalhes em [`QUICKSTART-VPS.md`](./QUICKSTART-VPS.md).
+
 ## 2. Instalar o Dokploy (pule se já tiver)
 
 ```bash
