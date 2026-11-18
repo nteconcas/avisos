@@ -31,8 +31,10 @@ avisos/
 ├── Dockerfile          ← imagem python:3.12-slim com o app
 ├── docker-compose.yml  ← alternativa (Compose / docker direto), publica 5005:5005
 ├── deploy-vps.sh       ← sobe/valida na 5005 com um comando
+├── verificar-musica.py ← confere página + MP3 pela rede (roda sem navegador)
 ├── diagnostico.sh      ← coleta o estado quando algo não abre
 ├── aviso-ponto.service ← unit do systemd (rodar sem Docker)
+├── politicas/          ← como liberar o autoplay do som nas máquinas
 ├── QUICKSTART-VPS.md   ← passo a passo resumido
 └── DEPLOY-DOCKPLOY.md  ← este guia
 ```
@@ -159,6 +161,9 @@ curl -s http://10.105.35.172:5005/login | grep -o "<title>.*</title>"
 > Se quiser confirmar o que está no ar sem abrir o navegador:
 > `curl -s -o /dev/null -w '%{http_code} %{content_type}\n' http://IP:5005/`
 > (esperado: `200 text/html; charset=utf-8`).
+>
+> Verificação completa (página + player + MP3 + `Range`), sem navegador:
+> `python3 verificar-musica.py http://IP:5005` → termina em `TUDO OK`.
 
 ### (Opcional) Servir também por um domínio com HTTPS
 

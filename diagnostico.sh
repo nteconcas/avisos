@@ -93,6 +93,13 @@ else
   echo "curl não instalado -> apt-get install -y curl"
 fi
 
+secao "5.1 Verificação completa da página + música (sem navegador)"
+if command -v python3 >/dev/null 2>&1 && [ -f verificar-musica.py ]; then
+  python3 verificar-musica.py "http://127.0.0.1:${PORTA}" 2>&1 | sed 's/^/  /'
+else
+  echo "  (precisa de python3 e do verificar-musica.py na pasta atual)"
+fi
+
 secao "6. A página servida é a deste projeto?"
 if command -v curl >/dev/null 2>&1 && [ -f index.html ]; then
   MD5_LOCAL=$(md5sum index.html | awk '{print $1}')

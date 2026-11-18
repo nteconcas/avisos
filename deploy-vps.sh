@@ -173,6 +173,17 @@ fi
 info "Mapeamento publicado pelo Docker:"
 docker port "$NOME_CONTAINER" 2>/dev/null | sed 's/^/    /' || true
 
+# --- 7.1 Verificação completa (página + player + MP3 + Range) --------------
+if command -v python3 >/dev/null 2>&1 && [ -f verificar-musica.py ]; then
+  echo
+  info "Conferindo página + música com verificar-musica.py:"
+  if python3 verificar-musica.py "http://127.0.0.1:${PORTA_HOST}" 2>&1 | sed 's/^/    /'; then
+    : # tudo certo
+  else
+    aviso "A verificação apontou FALHAs acima (a página pode estar no ar mesmo assim)."
+  fi
+fi
+
 IP_DETECTADO=$(hostname -I 2>/dev/null | awk '{print $1}')
 echo
 ok "Página de aviso no ar:  http://${IP_DETECTADO:-IP-DA-VPS}:${PORTA_HOST}/login"

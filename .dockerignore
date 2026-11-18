@@ -7,4 +7,6 @@ deploy-vps.sh
 diagnostico.sh
 aviso-ponto.service
 .gitattributes
+politicas
+verificar-musica.py
 *.wav

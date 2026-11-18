@@ -15,6 +15,9 @@ Navegador -> VPS:5005 -> app.py (Python) -> index.html
 | `/audio.mp3` | música de fundo, com suporte a `Range` (necessário para o player) |
 | `/healthz` | `200 ok` — usado pelo healthcheck do Docker |
 
+Para conferir **tudo isso de uma vez** (sem navegador, sem Node, sem Docker) existe
+o verificador `verificar-musica.py` — veja a [seção 4](#4-conferir-se-está-mesmo-na-5005).
+
 ---
 
 ## 0. Jeito mais rápido, SEM Docker (1 comando)
@@ -104,6 +107,36 @@ curl -s -o /dev/null -w '%{http_code} %{content_type}\n' http://127.0.0.1:5005/
 ```
 
 De outra máquina da rede: `curl -I http://10.105.35.172:5005/login`
+
+### Verificação completa em 1 comando (recomendada na VPS)
+
+```bash
+cd ~/avisos
+python3 verificar-musica.py                      # dentro da VPS (porta 5005)
+python3 verificar-musica.py http://10.105.35.172:5005   # de qualquer máquina
+```
+
+Ele baixa a página e o MP3 pela rede e confere: rotas `/`, `/login`, rota
+desconhecida e `/healthz` (200 + `text/html`), o `<audio>` com `autoplay`/`loop`
+e a lógica de música/contagem no HTML entregue, e o MP3 (`Content-Type` de áudio,
+`Accept-Ranges`, tamanho real **4.140.409 bytes**, `Range 0-1023` → `206` e sufixo
+`-2048` → `206`). Termina com `TUDO OK` (código 0) ou `FALHAS: n` (código 1).
+
+Saída esperada quando está tudo certo:
+
+```
+  ok    | /audio.mp3 responde 200
+  ok    | aceita Range (necessário ao loop)
+  ok    | o arquivo é um MP3 de verdade
+  ok    | Range 0-1023 -> 206
+TUDO OK: a página e a música estão sendo entregues corretamente.
+```
+
+> O que ele **não** prova é o som automático: isso é o navegador de cada usuário
+> quem decide. Na tela, o painel **Música de fundo** mostra o veredito:
+> “Tocando em loop · toque para pausar” = som liberado; “Som bloqueado — toque
+> para liberar” = falta aplicar a política de autoplay
+> ([`politicas/README.md`](politicas/README.md)).
 
 ---
 
