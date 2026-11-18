@@ -257,38 +257,48 @@
     </footer>
   </main>
 
-  <audio id="bg-audio" src="audio.mp3" autoplay loop preload="auto" playsinline aria-hidden="true"></audio>
+  <audio id="bg-audio" src="audio.mp3" loop preload="auto" aria-hidden="true"></audio>
 
   <script>
-    // Música de fundo em loop. Os navegadores podem bloquear a reprodução
-    // automática com som; nesse caso o áudio inicia na primeira interação
-    // do usuário (clique, toque, tecla, rolagem ou movimento do mouse).
+    // Música de fundo em loop.
+    // Navegadores (Chrome/Edge/Safari) bloqueiam a reprodução automática
+    // COM SOM até haver interação do usuário. Estratégia:
+    //   1) tenta tocar com som imediatamente;
+    //   2) se for bloqueado, inicia MUDA (permitido) e libera o som
+    //      automaticamente na primeira interação (clique/toque/tecla).
     (function () {
       var audio = document.getElementById('bg-audio');
       if (!audio) return;
       audio.volume = 0.6;
 
-      var tentarTocar = function () {
+      var eventos = ['pointerdown', 'click', 'touchstart', 'touchend', 'keydown'];
+      var destravado = false;
+
+      function liberarSom() {
+        if (destravado) return;
+        destravado = true;
+        audio.muted = false;
+        audio.volume = 0.6;
         var p = audio.play();
-        if (p && p.catch) p.catch(function () { /* aguarda interação do usuário */ });
-      };
-
-      tentarTocar();
-
-      var eventos = ['click', 'touchstart', 'keydown', 'scroll', 'mousemove'];
-      var liberar = function () {
-        tentarTocar();
+        if (p && p.catch) p.catch(function () {});
         eventos.forEach(function (e) {
-          window.removeEventListener(e, liberar);
+          document.removeEventListener(e, liberarSom, true);
         });
-      };
+      }
+
       eventos.forEach(function (e) {
-        window.addEventListener(e, liberar, { passive: true });
+        document.addEventListener(e, liberarSom, true);
       });
 
-      document.addEventListener('visibilitychange', function () {
-        if (!document.hidden) tentarTocar();
-      });
+      var p = audio.play();
+      if (p && p.then) {
+        p.then(function () { destravado = true; }).catch(function () {
+          // Autoplay com som bloqueado: inicia mudo para já estar rodando.
+          audio.muted = true;
+          var pm = audio.play();
+          if (pm && pm.catch) pm.catch(function () {});
+        });
+      }
     })();
 
     // Redirecionamento automático após 10 segundos.
