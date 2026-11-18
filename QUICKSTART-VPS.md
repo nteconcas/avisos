@@ -1,131 +1,173 @@
 # Rodar na porta 5005 (VPS)
 
-Resumo: este projeto é **uma página estática de aviso** (HTML + MP3) servida por
-**nginx dentro de um contêiner**. O nginx escuta a porta **80 dentro do
-contêiner** e o Docker publica essa porta como **5005 no host/VPS**.
-Não há back-end, banco, Python ou Node para executar — só Docker.
+Resumo: este projeto é **uma página de aviso** (HTML + MP3) servida por um
+**app Python mínimo** (`app.py`, só biblioteca padrão). Ele entrega o aviso em
+**qualquer rota** — inclusive `/login`, que é o favorito salvo pelos usuários —
+na porta **5005**. Não há banco, Node, nginx nem dependências para instalar.
 
 ```
-Navegador -> VPS:5005 -> [docker-proxy] -> contêiner:80 (nginx) -> index.html
+Navegador -> VPS:5005 -> app.py (Python) -> index.html
 ```
+
+| Rota | Resposta |
+|---|---|
+| `/`, `/login`, qualquer caminho | `index.html` com `200` (nunca 404) |
+| `/audio.mp3` | música de fundo, com suporte a `Range` (necessário para o player) |
+| `/healthz` | `200 ok` — usado pelo healthcheck do Docker |
 
 ---
 
-## 1. Jeito mais rápido (script pronto)
+## 0. Jeito mais rápido, SEM Docker (1 comando)
 
-Na VPS, com o projeto já copiado/clonado:
+Se a VPS tem Python 3.8+ (praticamente todas têm), não precisa de Docker:
 
 ```bash
-cd ~/avisos                      # pasta com Dockerfile, index.html, nginx.conf
+cd ~/avisos
+python3 app.py        # sobe em 0.0.0.0:5005
+```
+
+Em outro terminal, confirme: `curl -I http://127.0.0.1:5005/login` → `HTTP/1.1 200 OK`.
+
+Para ficar rodando sempre (e voltar após reboot), use **systemd**.
+Crie `/etc/systemd/system/aviso-ponto.service`:
+
+```ini
+[Unit]
+Description=Aviso de migracao do sistema de ponto
+After=network.target
+
+[Service]
+WorkingDirectory=/root/avisos
+ExecStart=/usr/bin/python3 app.py
+Environment=PORT=5005
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now aviso-ponto
+systemctl status aviso-ponto --no-pager
+sudo journalctl -u aviso-ponto -f     # logs (Ctrl+C para sair)
+```
+
+> Ajuste `WorkingDirectory` para a pasta real do projeto (onde está `app.py`).
+
+## 1. Com Docker — script pronto
+
+```bash
+cd ~/avisos
 chmod +x deploy-vps.sh
 sudo ./deploy-vps.sh
 ```
 
-O script faz tudo e no final testa `GET /` e `GET /login` (precisa dar **200**):
+O script constrói a imagem, recria o contêiner, espera ficar saudável e testa
+`/`, `/login`, `/audio.mp3` e `/healthz` (todos precisam dar **200**):
 
 ```
 ✔ Página de aviso no ar:  http://10.105.35.172:5005/login
 ```
 
-Se quiser outra porta: `sudo PORTA_HOST=8080 ./deploy-vps.sh`
+Outra porta: `sudo PORTA_HOST=8080 ./deploy-vps.sh`
 
-## 2. Jeito manual (3 comandos)
+## 2. Com Docker — manual
 
 ```bash
-docker compose up -d --build          # sobe publicando 0.0.0.0:5005 -> 80
-docker compose logs -f                # acompanhar (Ctrl+C para sair)
+docker compose up -d --build          # publica 0.0.0.0:5005 -> 5005
+docker compose logs -f                # Ctrl+C para sair
 curl -I http://127.0.0.1:5005/login   # esperado: HTTP/1.1 200 OK
 ```
 
-Sem o plugin `docker compose` (Docker antigo):
+Sem o plugin `docker compose`:
 
 ```bash
 docker build -t aviso-ponto .
-docker run -d --name aviso-ponto --restart unless-stopped -p 0.0.0.0:5005:80 aviso-ponto
+docker run -d --name aviso-ponto --restart unless-stopped -p 0.0.0.0:5005:5005 aviso-ponto
 ```
 
 ## 3. Deploy pelo Dokploy
 
 Use o tipo **Compose** apontando para este repositório (o `docker-compose.yml`
-já publica `5005:80`) **ou** o tipo **Application** com build *Dockerfile* e, em
-**Advanced → Ports**, `Published 5005` → `Target 80`. Passo a passo completo em
+já publica `5005:5005`) **ou** o tipo **Application** com build *Dockerfile* e,
+em **Advanced → Ports**, `Published 5005` → `Target 5005`. Passo a passo em
 [`DEPLOY-DOCKPLOY.md`](./DEPLOY-DOCKPLOY.md).
 
-> Importante: o Dokploy só responde no IP da máquina onde ele está instalado.
-> Se ele estiver em outra VPS, o `http://10.105.35.172:5005/login` **não** vai
-> funcionar — use o script/`docker compose` na própria máquina antiga.
+> O Dokploy só responde no IP da máquina onde ele está instalado. Se estiver em
+> outra VPS, `http://10.105.35.172:5005` **não** vai funcionar — rode na
+> máquina antiga (seção 0 ou 1).
 
 ---
 
 ## 4. Conferir se está mesmo na 5005
 
 ```bash
-docker port aviso-ponto
-# 80/tcp -> 0.0.0.0:5005
-
 ss -ltnp | grep :5005
-# LISTEN ... 0.0.0.0:5005  users:(("docker-proxy",pid=...))
+# LISTEN 0.0.0.0:5005 users:(("python3",pid=...))        <- sem Docker
+# LISTEN 0.0.0.0:5005 users:(("docker-proxy",pid=...))   <- com Docker
 
 curl -s http://127.0.0.1:5005/login | grep -o '<title>.*</title>'
 # <title>Aviso — Sistema de Ponto migrado | Praticus</title>
+
+curl -s -o /dev/null -w '%{http_code} %{content_type}\n' http://127.0.0.1:5005/
+# 200 text/html; charset=utf-8
 ```
 
 De outra máquina da rede: `curl -I http://10.105.35.172:5005/login`
 
 ---
 
-## 5. Se a 5005 não subir
+## 5. Se a página não aparecer
 
-| Sintoma | Causa / solução |
-|---|---|
-| `bind: address already in use` | Porta ocupada pelo app **antigo** de ponto. Veja quem está nela: `ss -ltnp \| grep 5005` e pare (`docker stop <container>` / `systemctl stop <servico>`). O script já avisa quem é o dono da porta. |
-| Funciona em `127.0.0.1` mas não de fora | Firewall: `sudo ufw allow 5005/tcp` **e** liberar 5005 no Security Group/firewall do provedor da VPS. |
-| `/login` dá 404 | Você subiu um servidor estático simples (ex.: `python -m http.server`). Use a imagem deste repo: o `nginx.conf` tem `try_files ... /index.html`, então **qualquer** rota cai no aviso. |
-| `docker: command not found` | `curl -fsSL https://get.docker.com \| sh` |
-| `permission denied ... docker.sock` | Rode com `sudo` ou entre no grupo: `sudo usermod -aG docker $USER && newgrp docker` |
-| Aviso antigo/cacheado no navegador | O nginx manda `no-cache`; force `Ctrl+F5`. |
-| Quer trocar o IP/URL do texto | Edite `index.html` (IP antigo e `ponto.praticus.com.br`) e rode `sudo ./deploy-vps.sh` de novo. |
-
----
-
-### 5.1 "A página não aparece" — diagnóstico automático
-
-Rode na VPS (não altera nada, só coleta e mostra):
+Rode o diagnóstico (não altera nada, só coleta):
 
 ```bash
 chmod +x diagnostico.sh
 sudo ./diagnostico.sh
 ```
 
-Ele gera `diagnostico-AAAAMMDD-HHMMSS.txt` com: contêineres, o que está
-ouvindo na 5005, `docker port`, o `nginx.conf` **de dentro** do contêiner,
-testes HTTP em `/`, `/index.html`, `/login` e `/audio.mp3`, logs, firewall e
-um veredito ("funciona local, problema é acesso externo" vs "não está sendo
-servida").
+Ele gera `diagnostico-AAAAMMDD-HHMMSS.txt` com: contêineres, **quem** está
+ouvindo na 5005 (Docker ou `python3 app.py`), md5 do que é servido comparado ao
+`index.html` local, testes HTTP em `/`, `/login`, `/audio.mp3` e `/healthz`,
+logs, firewall e um veredito.
 
-As causas mais comuns, em ordem:
+| Sintoma | Causa / solução |
+|---|---|
+| `address already in use` ao subir | Porta ocupada pelo app **antigo** de ponto. `ss -ltnp \| grep 5005` mostra o dono; pare (`docker stop ...` / `systemctl stop ...`). |
+| Funciona em `127.0.0.1` mas não de fora | Firewall: `sudo ufw allow 5005/tcp` **e** liberar 5005 no Security Group/firewall do provedor. |
+| `/login` dá **404** | Você está usando `python -m http.server` ou o build *Static* do Dokploy. Use `python3 app.py` ou a imagem deste repo (qualquer rota cai no aviso). |
+| Aparece **"Welcome to nginx!"** | Outro nginx ainda responde na porta: pare esse serviço e suba este app. |
+| Navegador **baixa** o arquivo / mostra o código | `Content-Type` errado (servidor estático antigo). O `app.py` envia `text/html; charset=utf-8`. |
+| Abre o **sistema antigo** de ponto | Outro processo/contêiner ocupa a 5005 — pare o antigo antes. |
+| `docker: command not found` | Use a seção 0 (sem Docker) ou `curl -fsSL https://get.docker.com \| sh`. |
+| `permission denied ... docker.sock` | Rode com `sudo` ou `sudo usermod -aG docker $USER && newgrp docker`. |
+| Aviso antigo no navegador | O app manda `no-cache`; force `Ctrl+F5`. |
+| Quer trocar o IP/URL do texto | Edite `index.html` e reinicie (`systemctl restart aviso-ponto` ou `sudo ./deploy-vps.sh`). |
 
-| O que aparece | Causa | Correção |
-|---|---|---|
-| Página padrão **"Welcome to nginx!"** | subiu a imagem `nginx` pura, sem o nosso `nginx.conf` — ou outro serviço está na 5005 | `sudo ./deploy-vps.sh` (sempre constrói a imagem deste repo) |
-| **404** em `/login` | servidor estático simples (`python -m http.server`) ou build *Static* do Dokploy | use o build **Dockerfile**: o `try_files` do projeto resolve qualquer rota |
-| **Conexão recusada / timeout** | nada ouvindo na 5005, firewall ou IP errado | `ss -ltnp \| grep 5005`, `sudo ufw allow 5005/tcp`, liberar no provedor |
-| Navegador **baixa o arquivo** ou mostra o código-fonte | `Content-Type` errado | já corrigido no `nginx.conf` (`default_type text/html; charset utf-8`) — **rebuilde** com `./deploy-vps.sh` |
-| Aparece o **sistema antigo** de ponto | outro contêiner/app ainda na 5005 | `docker ps` e pare o antigo |
-
-> Depois de mexer no `nginx.conf` ou no `index.html` é obrigatório reconstruir
-> a imagem (`./deploy-vps.sh` ou `docker compose up -d --build`). Só
-> `docker restart` **não** aplica mudanças de arquivo.
+> Mudou `index.html` ou `app.py`? Com Docker é obrigatório **rebuildar**
+> (`sudo ./deploy-vps.sh` ou `docker compose up -d --build`). `docker restart`
+> sozinho **não** copia arquivos novos para dentro da imagem.
 
 ---
 
 ## 6. Comandos do dia a dia
 
 ```bash
-docker logs -f aviso-ponto        # logs do nginx (access log)
+# --- com Docker ---
+docker logs -f aviso-ponto        # logs do app (um acesso por linha)
 docker restart aviso-ponto        # reiniciar
 docker rm -f aviso-ponto          # parar e remover
-docker compose up -d --build      # atualizar após editar index.html
+docker compose up -d --build      # atualizar após editar index.html/app.py
+docker port aviso-ponto           # conferir o mapeamento (5005/tcp -> 0.0.0.0:5005)
+
+# --- sem Docker ---
+python3 app.py                    # primeiro plano (Ctrl+C para parar)
+sudo systemctl restart aviso-ponto
+sudo journalctl -u aviso-ponto -f
 ```
 
-O contêiner usa `--restart unless-stopped`, então volta sozinho se a VPS reiniciar.
+O contêiner usa `restart: unless-stopped` (e no modo systemd, `Restart=always`),
+então a página volta sozinha se a VPS reiniciar.
+

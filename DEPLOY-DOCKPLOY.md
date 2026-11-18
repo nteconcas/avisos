@@ -1,7 +1,8 @@
 # Hospedando a página de aviso no Dokploy
 
-Guia para publicar a página estática de desativação do sistema de ponto
-(`index.html`) usando o **Dokploy** (PaaS open-source, auto-hospedado).
+Guia para publicar a página de desativação do sistema de ponto
+(`index.html`, servida pelo app Python mínimo `app.py`) usando o **Dokploy**
+(PaaS open-source, auto-hospedado).
 
 ---
 
@@ -15,7 +16,7 @@ na **porta 5005**. Há dois cenários:
 
 | Cenário | O que fazer |
 |---|---|
-| **A — Dokploy no próprio servidor antigo (10.105.35.172)** | Siga este guia completo. O Dokploy publica a porta `5005 → 80` do contêiner. |
+| **A — Dokploy no próprio servidor antigo (10.105.35.172)** | Siga este guia completo. O Dokploy publica a porta `5005 → 5005` do contêiner (app Python). |
 | **B — Dokploy em outro servidor (ex.: na cloud)** | O Dokploy de lá **não consegue** responder pelo IP antigo. Nesse caso, rode o contêiner direto na máquina antiga com `docker compose up -d --build` (seção 8), ou instale o Dokploy nela também. |
 
 > Em ambos os casos, **pare o app antigo** que ocupava a porta 5005 antes de subir a página.
@@ -23,12 +24,15 @@ na **porta 5005**. Há dois cenários:
 ### Arquivos deste diretório
 
 ```
-aviso-desativacao/
+avisos/
+├── app.py              ← servidor Python (só stdlib): aviso em QUALQUER rota, porta 5005
 ├── index.html          ← a página de aviso
 ├── audio.mp3           ← música de fundo (WAV original convertido para MP3)
-├── nginx.conf          ← serve o aviso em QUALQUER rota (/login inclusive)
-├── Dockerfile          ← imagem nginx:alpine com a página
-├── docker-compose.yml  ← alternativa (Compose / docker direto), porta 5005
+├── Dockerfile          ← imagem python:3.12-slim com o app
+├── docker-compose.yml  ← alternativa (Compose / docker direto), publica 5005:5005
+├── deploy-vps.sh       ← sobe/valida na 5005 com um comando
+├── diagnostico.sh      ← coleta o estado quando algo não abre
+├── QUICKSTART-VPS.md   ← passo a passo resumido
 └── DEPLOY-DOCKPLOY.md  ← este guia
 ```
 
@@ -51,8 +55,11 @@ Se o app antigo de ponto ainda estiver rodando na 5005, pare-o
 (`docker stop <container>`, `systemctl stop <serviço>`, etc.).
 
 > **Atalho:** em vez de seguir este guia inteiro, rode `sudo ./deploy-vps.sh`
-> na VPS — ele sobe a página na porta 5005 e testa `/` e `/login`.
-> Detalhes em [`QUICKSTART-VPS.md`](./QUICKSTART-VPS.md).
+> na VPS — ele sobe a página na porta 5005 e testa `/`, `/login`, `/audio.mp3`
+> e `/healthz`. Detalhes em [`QUICKSTART-VPS.md`](./QUICKSTART-VPS.md).
+>
+> **Sem Docker?** O app é Python puro: `python3 app.py` já sobe em `0.0.0.0:5005`
+> (veja a seção 0 do QUICKSTART).
 
 ## 2. Instalar o Dokploy (pule se já tiver)
 
@@ -74,9 +81,9 @@ O Dokploy faz deploy a partir de um repositório (GitHub, GitLab, Bitbucket, Git
 ou Git puro). Crie um repositório, ex. `aviso-ponto`, com os arquivos deste diretório:
 
 ```bash
-cd aviso-desativacao
+cd avisos
 git init
-git add index.html nginx.conf Dockerfile .dockerignore
+git add .
 git commit -m "Página de aviso: sistema de ponto migrado para a nuvem"
 git remote add origin git@github.com:SUA-ORG/aviso-ponto.git
 git push -u origin main
@@ -103,10 +110,11 @@ Escolha **Dockerfile** e preencha:
 | Docker Context Path | `.` |
 | Docker Build Stage | *(deixe vazio)* |
 
-> **Por que Dockerfile e não "Static"?** O tipo *Static* do Dokploy também usa
-> nginx, mas com o nosso `nginx.conf` garantimos que **qualquer rota** — inclusive
-> `/login`, que é o endereço salvo nos favoritos dos usuários — exiba o aviso em
-> vez de um erro 404. O contêiner escuta na porta **80**.
+> **Por que Dockerfile e não "Static"?** O tipo *Static* do Dokploy serve os
+> arquivos com um nginx genérico e devolve **404** em `/login`, que é o endereço
+> salvo nos favoritos dos usuários. Aqui quem responde é o `app.py`: **qualquer
+> rota** exibe o aviso (200) e o áudio é servido com suporte a `Range`. O
+> contêiner escuta na porta **5005**.
 
 ## 6. Publicar a porta 5005 (aba Advanced → Ports)
 
@@ -115,7 +123,7 @@ Adicione uma porta:
 | Campo | Valor |
 |---|---|
 | **Published Port** (host) | `5005` |
-| **Target Port** (contêiner) | `80` |
+| **Target Port** (contêiner) | `5005` |
 | **Protocol** | `TCP` |
 
 Clique em **Save**. É isso que faz `http://10.105.35.172:5005` apontar para a página.
@@ -137,7 +145,11 @@ curl -s http://10.105.35.172:5005/login | grep -o "<title>.*</title>"
 ```
 
 3. Abra no navegador: `http://10.105.35.172:5005/login` → deve aparecer o aviso,
-   com redirecionamento automático para `https://ponto.praticus.com.br/login` em 15 s.
+   com redirecionamento automático para `https://ponto.praticus.com.br/login` após 10 s.
+
+> Se quiser confirmar o que está no ar sem abrir o navegador:
+> `curl -s -o /dev/null -w '%{http_code} %{content_type}\n' http://IP:5005/`
+> (esperado: `200 text/html; charset=utf-8`).
 
 ### (Opcional) Servir também por um domínio com HTTPS
 
@@ -145,7 +157,7 @@ Se quiser a página também em um domínio (ex.: `aviso.praticus.com.br`):
 
 1. Aponte o DNS (registro A) para o IP do servidor Dokploy
 2. Na aba **Domains** da aplicação: **Add Domain**
-   - Host: `aviso.praticus.com.br` · Path: `/` · **Container Port: 80**
+   - Host: `aviso.praticus.com.br` · Path: `/` · **Container Port: 5005**
    - HTTPS: ativado · Certificate: **Let's Encrypt**
 3. **Save** → **Deploy**
 
@@ -154,31 +166,37 @@ Se quiser a página também em um domínio (ex.: `aviso.praticus.com.br`):
 ### 8.1 Via Dokploy tipo "Compose"
 
 Em vez de Application, crie **Create Service → Compose**, aponte para o repo
-(o `docker-compose.yml` já está pronto com `5005:80`) e clique em **Deploy**.
-Mesmo resultado, sem precisar configurar a aba Ports.
+(o `docker-compose.yml` já está pronto, publicando `5005:5005`) e clique em
+**Deploy**. Mesmo resultado, sem precisar configurar a aba Ports.
 
 ### 8.2 Sem Dokploy na máquina antiga (cenário B)
 
-Na máquina `10.105.35.172`, com Docker instalado:
+Na máquina `10.105.35.172`, **sem Docker** (mais simples, só precisa de Python 3):
 
 ```bash
 git clone git@github.com:SUA-ORG/aviso-ponto.git
 cd aviso-ponto
-docker compose up -d --build
+python3 app.py                 # sobe em 0.0.0.0:5005
 ```
 
-Ou sem compose:
+Para deixar como serviço, veja o `aviso-ponto.service` (systemd) na seção 0 do
+[`QUICKSTART-VPS.md`](./QUICKSTART-VPS.md).
+
+Com Docker:
 
 ```bash
+docker compose up -d --build
+# ou, sem compose:
 docker build -t aviso-ponto .
-docker run -d --name aviso-ponto -p 5005:80 --restart unless-stopped aviso-ponto
+docker run -d --name aviso-ponto -p 5005:5005 --restart unless-stopped aviso-ponto
 ```
 
 ## 9. Atualizações futuras
 
-1. Edite o `index.html` e faça `git push`
+1. Edite o `index.html` (ou o `app.py`) e faça `git push`
 2. No Dokploy, clique em **Deploy** (ou ative o **Auto Deploy** via webhook nas
    configurações do provider para redeployar a cada push)
+3. Sem Dokploy: `sudo ./deploy-vps.sh` (Docker) ou `sudo systemctl restart aviso-ponto`
 
 ## 10. Solução de problemas
 
@@ -186,8 +204,11 @@ docker run -d --name aviso-ponto -p 5005:80 --restart unless-stopped aviso-ponto
 |---|---|
 | Deploy falha com erro de porta | 5005 (ou 80/443/3000) ocupada. `ss -tlnp \| grep 5005` e pare o serviço antigo. |
 | Página não abre de outras máquinas | Firewall do servidor ou da rede: libere `5005/tcp`. |
-| `/login` retorna 404 | Está usando build *Static* sem o nosso nginx. Use o build **Dockerfile** deste repo. |
-| Aviso antigo aparece após edição | Cache do navegador — o nginx já envia `no-cache`; force `Ctrl+F5`. |
+| `/login` retorna 404 | Build *Static* (nginx genérico) ou `python -m http.server`. Use o build **Dockerfile** deste repo ou `python3 app.py`. |
+| Aparece "Welcome to nginx!" | Outro serviço responde na porta: pare o contêiner/nginx antigo. |
+| Página em branco ou baixando o arquivo | `Content-Type` errado — o `app.py` envia `text/html; charset=utf-8`; use a imagem deste repo. |
+| Healthcheck vermelho no Dokploy | O app responde em `/healthz`; se falhar, veja os logs do deploy (porta errada no `Target Port`). |
+| Aviso antigo aparece após edição | Cache do navegador — o app já envia `no-cache`; force `Ctrl+F5`. |
 | Instalação do Dokploy falha | Portas 80/443/3000 em uso, ou menos de 2 GB de RAM. |
 
 ---

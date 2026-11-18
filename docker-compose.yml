@@ -1,6 +1,6 @@
 # Deploy da página de aviso (Dokploy tipo "Compose" ou docker compose direto).
-# Publica a página na porta 5005 do host, em TODAS as interfaces, mantendo o
-# endereço antigo acessível:
+# App Python (app.py) escutando em 0.0.0.0:5005 dentro do contêiner e publicado
+# na porta 5005 do host, mantendo o endereço antigo acessível:
 #   http://10.105.35.172:5005/login
 #
 # Subir/atualizar:  docker compose up -d --build
@@ -13,8 +13,13 @@ services:
       dockerfile: Dockerfile
     image: aviso-ponto:latest
     container_name: aviso-ponto
+    environment:
+      # Porta interna do app (o Dockerfile também define; aqui fica explícito)
+      PORT: "5005"
+      HOST: "0.0.0.0"
     # 0.0.0.0 = aceita conexão de qualquer interface da VPS (não só localhost).
-    # 5005 = porta do host/VPS (pode vir da env PORTA_HOST) | 80 = nginx no contêiner.
+    # 5005 = porta do host/VPS (pode vir da env PORTA_HOST) | 5005 = app Python.
     ports:
-      - "0.0.0.0:${PORTA_HOST:-5005}:80"
+      - "0.0.0.0:${PORTA_HOST:-5005}:5005"
     restart: unless-stopped
+

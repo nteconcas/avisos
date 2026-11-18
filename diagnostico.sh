@@ -52,7 +52,9 @@ if command -v docker >/dev/null 2>&1; then
   [ -z "$CID" ] && CID=$(docker ps -aq --filter "name=^${NOME}$" | head -1)
   if [ -z "$CID" ]; then
     echo "NENHUM contêiner publicado na ${PORTA} e nenhum chamado '${NOME}'."
-    echo "-> A página não está no ar. Rode: sudo ./deploy-vps.sh"
+    echo "-> Nesse caso a página não está no ar por Docker."
+    echo "   Opção 1: sudo ./deploy-vps.sh"
+    echo "   Opção 2 (sem Docker): python3 app.py"
   else
     docker inspect "$CID" --format 'nome:    {{.Name}}
 imagem:  {{.Config.Image}}
@@ -61,18 +63,26 @@ erro:    {{.State.Error}}
 portas:  {{json .NetworkSettings.Ports}}'
     sub "Mapeamento publicado (docker port)"
     docker port "$CID" || true
-    sub "Arquivos servidos dentro do contêiner"
-    docker exec "$CID" ls -la /usr/share/nginx/html 2>&1 || true
-    sub "Config do nginx dentro do contêiner (/etc/nginx/conf.d/default.conf)"
-    docker exec "$CID" cat /etc/nginx/conf.d/default.conf 2>&1 || true
-    sub "Teste de sintaxe do nginx (nginx -t)"
-    docker exec "$CID" nginx -t 2>&1 || true
+    sub "Arquivos do app dentro do contêiner (/app)"
+    docker exec "$CID" ls -la /app 2>&1 || true
+    sub "Versão do Python no contêiner"
+    docker exec "$CID" python3 --version 2>&1 || true
+    sub "O app está escutando lá dentro?"
+    docker exec "$CID" python3 -c "import urllib.request;print('healthz ->', urllib.request.urlopen('http://127.0.0.1:5005/healthz', timeout=2).getcode())" 2>&1 || true
   fi
+fi
+
+secao "4.1 Rodando sem Docker (python3 app.py)?"
+PROC=$(ps -eo pid,args 2>/dev/null | grep '[a]pp\.py' || true)
+if [ -n "$PROC" ]; then
+  echo "  processo encontrado:"; printf '%s\n' "$PROC" | sed 's/^/    /'
+else
+  echo "  nenhum processo 'app.py' rodando"
 fi
 
 secao "5. Testes HTTP em 127.0.0.1:${PORTA}"
 if command -v curl >/dev/null 2>&1; then
-  for caminho in / /index.html /login /audio.mp3 /qualquer-coisa; do
+  for caminho in / /index.html /login /audio.mp3 /healthz /qualquer-coisa; do
     printf '  %-16s -> ' "$caminho"
     curl -s -o /tmp/_diag_body -w 'HTTP %{http_code} | tipo: %{content_type} | bytes: %{size_download}\n' \
       --max-time 5 "http://127.0.0.1:${PORTA}${caminho}" || echo "FALHOU (conexão recusada/timeout)"
@@ -83,19 +93,20 @@ else
   echo "curl não instalado -> apt-get install -y curl"
 fi
 
-secao "6. A página certa está dentro do contêiner?"
-if [ -n "${CID:-}" ] && [ -f index.html ]; then
+secao "6. A página servida é a deste projeto?"
+if command -v curl >/dev/null 2>&1 && [ -f index.html ]; then
   MD5_LOCAL=$(md5sum index.html | awk '{print $1}')
-  MD5_CONT=$(docker exec "$CID" md5sum /usr/share/nginx/html/index.html 2>/dev/null | awk '{print $1}')
-  echo "  md5 local (projeto):   ${MD5_LOCAL:-?}"
-  echo "  md5 no contêiner:      ${MD5_CONT:-não encontrado}"
-  if [ "$MD5_LOCAL" = "$MD5_CONT" ]; then
-    echo "  -> iguais: a imagem foi construída com ESTE index.html."
+  MD5_SERV=$(curl -s --max-time 5 "http://127.0.0.1:${PORTA}/" | md5sum | awk '{print $1}')
+  echo "  md5 do index.html local:  ${MD5_LOCAL}"
+  echo "  md5 do que é servido:     ${MD5_SERV}"
+  if [ "$MD5_LOCAL" = "$MD5_SERV" ]; then
+    echo "  -> iguais: quem responde na ${PORTA} está entregando ESTE index.html."
   else
-    echo "  -> DIFERENTES: a imagem está velha/errada. Rode: sudo ./deploy-vps.sh (ele refaz o build)."
+    echo "  -> DIFERENTES: outro serviço/imagem velha responde na ${PORTA}."
+    echo "     Rode: sudo ./deploy-vps.sh   (refaz o build da imagem)"
   fi
 else
-  echo "  (sem contêiner ou fora da pasta do projeto)"
+  echo "  (precisa de curl e do index.html na pasta atual)"
 fi
 
 secao "7. O que está sendo entregue na raiz"
@@ -106,9 +117,10 @@ else
   TITULO=$(printf '%s' "$BODY" | grep -o '<title>[^<]*</title>' | head -1)
   echo "  título: ${TITULO:-<sem title>}"
   case "$BODY" in
-    *"Welcome to nginx"*)       echo "  -> É a PÁGINA PADRÃO do nginx: o nginx.conf do projeto NÃO foi aplicado (build/porta apontando para outro serviço)." ;;
+    *"Welcome to nginx"*)       echo "  -> É a PÁGINA PADRÃO do nginx: quem responde na porta é outro serviço, não este app." ;;
+    *"<title>Aviso"*)           echo "  -> Página de aviso correta (app.py no ar)." ;;
     *"index.html foi desativado"*|*"Este endereço foi desativado"*) echo "  -> Página de aviso correta." ;;
-    *"<html"*)                  echo "  -> HTML recebido." ;;
+    *"<html"*)                  echo "  -> HTML recebido (compare o título esperado)." ;;
     *)                          echo "  -> Conteúdo inesperado (veja as primeiras linhas acima)." ;;
   esac
 fi
@@ -146,7 +158,7 @@ else
   echo "   1) sudo ./deploy-vps.sh        (refaz build e sobe de novo)"
   echo "   2) ss -ltnp | grep ${PORTA}    (ver se algo está ouvindo)"
   echo "   3) docker ps -a                (ver se o contêiner está Up, não Restarting)"
-  echo "   4) docker logs ${NOME}         (erros do nginx)"
+  echo "   4) docker logs ${NOME}         (erros do app)"
 fi
 
 echo

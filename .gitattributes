@@ -2,5 +2,6 @@
 # Sem isso o bash da VPS falha com "$'\r': command not found".
 *.sh   text eol=lf
 *.conf text eol=lf
+*.py   text eol=lf
 Dockerfile text eol=lf
 *.yml  text eol=lf

@@ -8,12 +8,12 @@
 #   PORTA_HOST=8080 ./deploy-vps.sh   # muda a porta, se precisar
 #
 # O script: confere Docker, libera/recria o contêiner, faz build, sobe,
-# espera ficar saudável e testa / e /login respondendo 200.
+# espera ficar saudável e testa /, /login, /audio.mp3 e /healthz.
 # ---------------------------------------------------------------------------
 set -uo pipefail
 
 PORTA_HOST="${PORTA_HOST:-5005}"
-PORTA_CONTAINER="${PORTA_CONTAINER:-80}"
+PORTA_CONTAINER="${PORTA_CONTAINER:-5005}"
 NOME_CONTAINER="${NOME_CONTAINER:-aviso-ponto}"
 IMAGEM="${IMAGEM:-aviso-ponto:latest}"
 
@@ -26,8 +26,8 @@ aviso(){ printf '\033[1;33m!\033[0m %s\n' "$*"; }
 erro() { printf '\033[1;31m✘\033[0m %s\n' "$*" >&2; }
 
 # --- 0. Estamos na pasta certa? -------------------------------------------
-if [ ! -f Dockerfile ] || [ ! -f index.html ] || [ ! -f nginx.conf ]; then
-  erro "Execute este script dentro da pasta do projeto (onde estão Dockerfile, index.html e nginx.conf)."
+if [ ! -f Dockerfile ] || [ ! -f app.py ] || [ ! -f index.html ]; then
+  erro "Execute este script dentro da pasta do projeto (onde estão Dockerfile, app.py e index.html)."
   exit 1
 fi
 
@@ -150,16 +150,24 @@ ok "Serviço respondendo."
 CODIGO_RAIZ=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORTA_HOST}/")
 CODIGO_LOGIN=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORTA_HOST}/login")
 CODIGO_AUDIO=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORTA_HOST}/audio.mp3")
+CODIGO_SAUDE=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:${PORTA_HOST}/healthz")
+TIPO_RAIZ=$(curl -s -o /dev/null -w '%{content_type}' "http://127.0.0.1:${PORTA_HOST}/")
 TITULO=$(curl -fsS "http://127.0.0.1:${PORTA_HOST}/login" 2>/dev/null | grep -o '<title>[^<]*</title>' | head -1)
 
-printf '   /          -> HTTP %s\n' "$CODIGO_RAIZ"
+printf '   /          -> HTTP %s (%s)\n' "$CODIGO_RAIZ" "${TIPO_RAIZ:-?}"
 printf '   /login     -> HTTP %s  (precisa ser 200: é o favorito dos usuários)\n' "$CODIGO_LOGIN"
 printf '   /audio.mp3 -> HTTP %s\n' "$CODIGO_AUDIO"
+printf '   /healthz   -> HTTP %s\n' "$CODIGO_SAUDE"
 printf '   título     -> %s\n' "${TITULO:-<não encontrado>}"
 
-if [ "$CODIGO_RAIZ" != "200" ] || [ "$CODIGO_LOGIN" != "200" ]; then
+if [ "$CODIGO_RAIZ" != "200" ] || [ "$CODIGO_LOGIN" != "200" ] || [ "$CODIGO_SAUDE" != "200" ]; then
   erro "Os testes falharam. Verifique: docker logs ${NOME_CONTAINER}"
   exit 1
+fi
+
+if ! printf '%s' "$TITULO" | grep -q 'Aviso'; then
+  aviso "A página respondeu, mas o título esperado não apareceu."
+  aviso "Provável imagem velha em cache: rode novamente com --build (o script já faz)."
 fi
 
 info "Mapeamento publicado pelo Docker:"
@@ -177,3 +185,7 @@ echo "  cloud:     libere a porta ${PORTA_HOST} no Security Group / firewall do 
 echo
 echo "Logs:   docker logs -f ${NOME_CONTAINER}"
 echo "Parar:  docker rm -f ${NOME_CONTAINER}   (ou: docker compose down)"
+echo
+echo "Sem Docker? O app é Python puro e roda direto:"
+echo "  python3 app.py            # sobe em 0.0.0.0:5005"
+echo "  (detalhes do modo systemd em QUICKSTART-VPS.md)"
