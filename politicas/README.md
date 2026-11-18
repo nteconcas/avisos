@@ -6,9 +6,12 @@ automaticamente quando o site tem permissão de autoplay** — é uma proteção
 navegador, não uma limitação da página. Para o aviso tocar sozinho em todos os
 computadores, libere o autoplay na máquina (uma vez, como Administrador).
 
-Enquanto a política não estiver aplicada, a página não fica muda: a faixa segue
-rodando em mudo (sem perder o lugar), a dica aparece e o som entra no primeiro
-toque/clique — e a página continua tentando o som sozinha.
+Enquanto a política não estiver aplicada, o navegador bloqueia o som: a página
+mostra a dica (e o botão flutuante "♪ Ativar música") e libera no primeiro
+toque/clique/tecla/scroll — e continua tentando o som sozinha nos primeiros
+segundos e sempre que a aba volta ao foco. Em navegadores que permitem autoplay
+mudo (Firefox e Safari, em geral) a faixa já começa a rodar sem som e é só
+desmutada no primeiro gesto.
 
 ## Opção A — Registro do Windows (recomendada: vale para a máquina toda)
 

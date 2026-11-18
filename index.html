@@ -829,13 +829,13 @@
       }, 1000);
       /* ---------------- música de fundo ----------------
          Objetivo: a música toca SOZINHA, com som, e segue tocando até o
-         redirecionamento. O navegador só recusa áudio com som quando o site
-         ainda não tem permissão de autoplay. Fluxo:
+         redirecionamento. Fluxo:
            1) pede play() COM SOM já no carregamento (é o caso normal quando a
               política AutoplayAllowed está aplicada — ver pasta politicas/);
-           2) se o navegador recusar, mantém a faixa rodando MUDA (isso é
-              permitido, então a música não perde o lugar) e mostra a dica;
-           3) insiste com som a cada segundo e em canplay/focus/pageshow/aba
+           2) se o navegador recusar, mostra a dica e tenta manter a faixa em
+              mudo (Chrome/Edge exigem gesto até para áudio mudo; Firefox e
+              Safari costumam permitir);
+           3) insiste com som a cada segundo (até 5x) e em focus/pageshow/aba
               visível, para o som entrar sozinho assim que o navegador liberar;
            4) qualquer toque/clique/tecla/scroll libera o som na hora (fade-in).
          A contagem NÃO pausa: a música vai até o redirecionamento. */
@@ -876,7 +876,7 @@
         if (subMusica) {
           if (tocando) {
             subMusica.textContent = 'Tocando em loop · toque para pausar';
-          } else if (!audio.paused && audio.muted) {
+          } else if (somBloqueado) {
             subMusica.textContent = 'Som bloqueado — toque para liberar';
           } else {
             subMusica.textContent = 'Começa sozinha · em loop';
@@ -902,15 +902,27 @@
         }, 90);
       }
 
+      /* Estado comum de "o navegador não liberou o som": fica em mudo (quando o
+         navegador permite), mostra a dica e rearma o desbloqueio por gesto. */
+      function falhouLiberacao() {
+        somBloqueado = true;
+        desbloqueado = false;            // um novo gesto pode tentar de novo
+        if (audio) audio.muted = true;
+        setTimeout(retomarMudo, 150);    // o Chrome pausa logo após recusar
+        if (dica) dica.hidden = false;
+        armarDesbloqueio();
+        atualizarInterface();
+      }
+
       function tocar() {
         if (!audio) return;
         audio.muted = false;
-        somBloqueado = false;
         audio.volume = 0.05;
         var p = audio.play();
-        if (p && p.catch) p.catch(function () {});
+        if (p && p.catch) p.catch(falhouLiberacao);
         fade(VOLUME);
         if (dica) dica.hidden = true;
+        somBloqueado = false;
       }
 
       var EVENTOS = ['pointerdown', 'touchstart', 'keydown', 'wheel', 'scroll'];
@@ -948,8 +960,8 @@
         retentativa = null;
       }
 
-      /* Enquanto o som estiver bloqueado, mantém a faixa tocando em mudo (o
-         Chrome pausa a mídia quando o desmute é recusado). */
+      /* Se o navegador permitir áudio mudo, mantém a faixa tocando (sem perder o
+         lugar). Chrome/Edge pausam a mídia quando o desmute é recusado. */
       function retomarMudo() {
         if (!audio || audivel() || desbloqueado || !somBloqueado || encerrado) return;
         audio.muted = true;
@@ -983,13 +995,7 @@
           atualizarInterface();
         }, function () {
           tentando = false;
-          somBloqueado = true;
-          audio.muted = true;              // mudo é sempre permitido
-          // O Chrome pausa a faixa um instante depois de recusar o desmute.
-          setTimeout(retomarMudo, 150);
-          if (dica) dica.hidden = false;
-          armarDesbloqueio();
-          atualizarInterface();
+          falhouLiberacao();
         });
       }
 
@@ -1013,7 +1019,7 @@
         pararRetentativas();
         pararDesbloqueio();
         if (audivel()) audio.pause();
-        else tentarComSom();
+        else tocar();          // gesto do usuário: som na hora, com fade-in
       }
 
       if (botao) botao.addEventListener('click', alternarMusica);
